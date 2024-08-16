@@ -7,11 +7,44 @@ import H3 from '../components/H3.astro';
 
 const { title } = Astro.props;
 
+// Import and parse the sidebar configuration
+import sidebarConfig from '../config/sidebar.json';
+
 const components = {
   h1: H1,
   h2: H2,
   h3: H3,
 };
+
+// Function to determine the previous and next pages and their names
+const findPrevNext = (currentPath, sidebarConfig) => {
+  let prev = null;
+  let next = null;
+  let prevName = '';
+  let nextName = '';
+
+  const pages = sidebarConfig.order.flatMap(category => category.items.map(item => {
+    return {
+      path: typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', ''),
+      name: typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name
+    };
+  }));
+
+  const currentIndex = pages.findIndex(page => `/${page.path}` === currentPath);
+
+  if (currentIndex > 0) {
+    prev = `/${pages[currentIndex - 1].path}`;
+    prevName = pages[currentIndex - 1].name;
+  }
+  if (currentIndex < pages.length - 1) {
+    next = `/${pages[currentIndex + 1].path}`;
+    nextName = pages[currentIndex + 1].name;
+  }
+
+  return { prev, next, prevName, nextName };
+};
+
+const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 ---
 
 <!DOCTYPE html>
@@ -54,6 +87,31 @@ const components = {
       /* Dark mode text for the main content */
       .dark .prose {
         color: white; /* Text color for MDX content in dark mode */
+      }
+
+      /* Styles for the navigation arrows at the bottom */
+      .nav-links {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        font-weight: bold;
+      }
+      .nav-links a {
+        display: flex;
+        align-items: center;
+        color: #004CA3;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      .nav-links a:hover {
+        text-decoration: underline;
+      }
+      .dark .nav-links a {
+        color: white;
+      }
+      .nav-links a span {
+        margin: 0 0.5rem;
       }
     </style>
   </head>
@@ -98,6 +156,24 @@ const components = {
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <slot components={components} />
+        <!-- Navigation Links at the Bottom -->
+        <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
+        <div class="nav-links">
+          {prev ? (
+            <a href={prev}>
+              <i class="fas fa-arrow-left"></i><span>{prevName}</span>
+            </a>
+          ) : (
+            <span></span>
+          )}
+          {next ? (
+            <a href={next}>
+              <span>{nextName}</span><i class="fas fa-arrow-right"></i>
+            </a>
+          ) : (
+            <span></span>
+          )}
+        </div>
       </main>
     </div>
 
@@ -142,7 +218,6 @@ const components = {
           }
         };
 
-        // Function to update the active link based on the current path
         const updateActiveLink = () => {
           const currentPath = window.location.pathname;
           const links = document.querySelectorAll('#sidebar-content a');
@@ -158,7 +233,6 @@ const components = {
           });
         };
 
-        // Function to handle navigation and toggling of folders
         const navigateAndToggle = async (event, path) => {
           event.preventDefault();
 
@@ -213,16 +287,13 @@ const components = {
           }
         };
 
-        // Attach navigateAndToggle function to the global scope
         window.navigateAndToggle = navigateAndToggle;
 
-        // Handle client-side navigation
         const links = document.querySelectorAll('a[href^="/"]');
         links.forEach(link => {
           link.addEventListener('click', (e) => navigateAndToggle(e, link.getAttribute('href')));
         });
 
-        // Handle back/forward navigation
         window.addEventListener('popstate', async () => {
           try {
             const response = await fetch(location.pathname);
@@ -244,7 +315,6 @@ const components = {
           }
         });
 
-        // Initial update of active link
         updateActiveLink();
       });
     </script>
