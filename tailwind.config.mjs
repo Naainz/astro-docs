@@ -1,6 +1,6 @@
 // tailwind.config.js
 module.exports = {
-	darkMode: 'class', // Enables dark mode by adding a 'dark' class
+	darkMode: 'class', 
 	content: [
 	  './src/**/*.{astro,html,js,jsx,ts,tsx,vue,svelte,mdx}',
 	],
@@ -8,7 +8,7 @@ module.exports = {
 	  extend: {},
 	},
 	plugins: [
-	  require('@tailwindcss/typography'), // Enables the 'prose' class
+	  require('@tailwindcss/typography'),
 	],
   }
   

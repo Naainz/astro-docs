@@ -4,12 +4,10 @@
 @tailwind utilities;
 
 html {
-  @apply transition-colors duration-500;
   font-family: 'Satoshi', sans-serif;
 }
 
 body {
-  @apply transition-colors duration-500;
 }
 
 body.dark {

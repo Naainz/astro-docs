@@ -15,7 +15,7 @@ const components = {
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="transition-colors duration-500">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,14 +39,12 @@ const components = {
       /* Ensure GitHub icon and text adapt to dark mode */
       .github-icon {
         filter: invert(0); /* Default (light mode) */
-        transition: filter 0.3s ease;
       }
       .dark .github-icon {
         filter: invert(1); /* Invert the color for dark mode */
       }
       .navbar-text {
         color: #333; /* Default text color for light mode */
-        transition: color 0.3s ease;
       }
       .dark .navbar-text {
         color: white; /* Text color in dark mode */
@@ -57,8 +55,8 @@ const components = {
       }
     </style>
   </head>
-  <body class="bg-gray-100 text-gray-900 transition-colors duration-500 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
-    <nav class="bg-white dark:bg-gray-800 shadow mb-4 transition-colors duration-500 py-4 fixed top-0 inset-x-0 z-50">
+  <body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
+    <nav class="bg-white dark:bg-gray-800 shadow mb-4 py-4 fixed top-0 inset-x-0 z-50">
       <div class="container mx-auto px-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold navbar-text" onclick="navigateAndLoad(event, '/')">AstroDocs</a>
         <div class="flex items-center space-x-4">
@@ -77,7 +75,7 @@ const components = {
       </div>
     </nav>
 
-    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full">
+    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full pt-16 h-full">
       <div class="p-4 h-full">
         <div id="sidebar-content" class="overflow-y-auto h-full">
           <Sidebar />
@@ -90,7 +88,7 @@ const components = {
       </div>
     </div>
 
-    <div id="main-content" class="container mx-auto px-4 flex mt-24 transition-opacity duration-500">
+    <div id="main-content" class="container mx-auto px-4 flex mt-24">
       <aside class="hidden md:block w-64">
         <div id="sidebar-content">
           <Sidebar />
