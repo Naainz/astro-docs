@@ -1,8 +1,7 @@
 {
   "order": [
     {
-      "category": "Introduction",
-      "items": ["introduction.mdx", "demo.mdx"]
+      "items": ["index.mdx", "demo.mdx"]
     },
     {
       "category": "Themes",

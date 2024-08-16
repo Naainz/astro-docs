@@ -14,6 +14,7 @@ function isDirectory(path) {
 
 // Function to read the frontmatter of an MDX file
 function getPageName(filePath) {
+  if (isDirectory(filePath)) return null; // Avoid reading directories
   const fileContent = readFileSync(filePath, 'utf8');
   const { data } = matter(fileContent);
   return data.path || basename(filePath, '.mdx').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -32,7 +33,7 @@ const categories = sidebarConfig.order.map(category => {
         }));
 
       return {
-        name: fileOrDir,
+        name: getPageName(fullPath) || fileOrDir,
         path: `/${fileOrDir}/`,
         isDirectory: true,
         items: dirFiles,
@@ -85,7 +86,8 @@ const currentPath = Astro.url.pathname;
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
-                <div class="ml-4 mt-2 space-y-2">
+                <div class="ml-4 mt-2 space-y-2 relative">
+                  <div class="absolute left-[-10px] top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-600"></div> <!-- Vertical line -->
                   {link.items.map((subLink, subLinkIndex) => (
                     <a 
                       key={subLinkIndex}
