@@ -11,12 +11,18 @@ function isDirectory(path) {
   return statSync(path).isDirectory();
 }
 
-// Function to read the frontmatter of an MDX file
-function getPageName(filePath) {
-  if (isDirectory(filePath)) return null; // Avoid reading directories
+// Function to read the frontmatter of an MDX file and return its name and path
+function getPageData(filePath, parentDir = '') {
+  if (isDirectory(filePath)) return null; // Skip directories
   const fileContent = readFileSync(filePath, 'utf8');
   const { data } = matter(fileContent);
-  return data.path || basename(filePath, '.mdx').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const fileName = basename(filePath, '.mdx');
+
+  // If the file is 'index.mdx', treat it as the root path or the parent directory path
+  const path = fileName === 'index' ? (parentDir || '/') : `/${parentDir}${fileName}`;
+  const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  return { path, name };
 }
 
 // Build the links structure from the config file
@@ -33,25 +39,20 @@ const categories = sidebarConfig.order.map(category => {
     const fullPath = join(pagesDir, fileOrDir);
     if (isDirectory(fullPath)) {
       const dirFiles = readdirSync(fullPath)
-        .filter(file => file !== 'index.mdx' && file.endsWith('.mdx'))
-        .map(file => ({
-          name: getPageName(join(fullPath, file)),
-          path: `/${fileOrDir}/${basename(file, '.mdx')}`
-        }));
+        .filter(file => file.endsWith('.mdx') && file !== 'index.mdx') // Exclude 'index.mdx' from being listed as a separate file
+        .map(file => getPageData(join(fullPath, file), `${fileOrDir}/`))
+        .filter(Boolean); // Filter out null values
 
       return {
-        name: getPageName(fullPath) || fileOrDir,
+        name: getPageData(join(fullPath, 'index.mdx'), `${fileOrDir}/`)?.name || fileOrDir.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
         path: `/${fileOrDir}/`,
         isDirectory: true,
         items: dirFiles,
       };
     } else {
-      return {
-        name: getPageName(fullPath),
-        path: `/${basename(fileOrDir, '.mdx')}`
-      };
+      return getPageData(fullPath);
     }
-  });
+  }).filter(Boolean); // Filter out null values
 
   return {
     name: category.category,
