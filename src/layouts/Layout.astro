@@ -173,31 +173,32 @@ const components = {
         };
 
         const navigateAndToggle = async (event, path) => {
-        event.preventDefault();
-        
-        const decodedPath = decodeURIComponent(path);
-        toggleFolder(decodedPath);  // Toggle the folder dropdown
-        
-        try {
-          const response = await fetch(decodedPath);  // Use the decoded path here
-          if (!response.ok) {
-            throw new Error(`Failed to load content: ${response.statusText}`);
+          event.preventDefault();
+          
+          const decodedPath = decodeURIComponent(path); // Ensure the path is decoded correctly
+          toggleFolder(decodedPath);  // Toggle the folder dropdown
+          
+          try {
+            const response = await fetch(decodedPath);  // Use the decoded path here
+            if (!response.ok) {
+              throw new Error(`Failed to load content: ${response.statusText}`);
+            }
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('#content');
+            if (newContent) {
+              document.querySelector('#content').innerHTML = newContent.innerHTML;
+              history.pushState({}, '', decodedPath);  // Update the history with the decoded path
+              updateActiveLink();  // Update the active link after content is loaded
+            } else {
+              console.error("Content not found in the response HTML.");
+            }
+          } catch (error) {
+            console.error(error);
           }
-          const html = await response.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newContent = doc.querySelector('#content');
-          if (newContent) {
-            document.querySelector('#content').innerHTML = newContent.innerHTML;
-            history.pushState({}, '', decodedPath);  // Update the history with the decoded path
-            updateActiveLink();  // Update the active link after content is loaded
-          } else {
-            console.error("Content not found in the response HTML.");
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
+        };
+
 
 
         // Attach navigateAndToggle function to the global scope
