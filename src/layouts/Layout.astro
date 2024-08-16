@@ -172,20 +172,69 @@ const components = {
           }
         };
 
+        const toggleDropdown = (event, path) => {
+          event.preventDefault();
+
+          const folder = document.getElementById(path);
+          if (folder) {
+            folder.classList.toggle('max-h-screen');
+            folder.classList.toggle('max-h-0');
+            const arrow = event.currentTarget.querySelector('svg');
+            if (arrow) {
+              arrow.classList.toggle('rotate-90');
+            }
+          }
+        };
+
+        const navigateAndLoad = async (event, path) => {
+          event.preventDefault();
+
+          const decodedPath = decodeURIComponent(path);
+
+          try {
+            const response = await fetch(decodedPath);  // Fetch the new content
+            if (!response.ok) {
+              throw new Error(`Failed to load content: ${response.statusText}`);
+            }
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('#content');
+            if (newContent) {
+              document.querySelector('#content').innerHTML = newContent.innerHTML;
+              history.pushState({}, '', decodedPath);  // Update the history with the decoded path
+              updateActiveLink();  // Update the active link after content is loaded
+
+              // Collapse any open directories that are no longer active
+              const openDirectories = document.querySelectorAll('.max-h-screen');
+              openDirectories.forEach(dir => {
+                const dirPath = dir.getAttribute('id');
+                if (!decodedPath.startsWith(dirPath)) {
+                  toggleDropdown({ preventDefault: () => {}, currentTarget: document.querySelector(`a[href="${dirPath}"]`) }, dirPath);
+                }
+              });
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        };
+
+
+
         const navigateAndToggle = async (event, path) => {
           event.preventDefault();
 
           const isDirectory = event.currentTarget.hasAttribute('data-directory');
           const decodedPath = decodeURIComponent(path);
 
+          // Toggle the folder dropdown if it's a directory
           if (isDirectory) {
-            toggleFolder(decodedPath);  // Toggle the folder dropdown if it's a directory
+            toggleFolder(decodedPath);
             history.pushState({}, '', decodedPath);  // Update URL without reloading
 
             // Fetch and load the directory's index content
             try {
-              const indexPath = `${decodedPath}`;  // Use the base directory path
-              const response = await fetch(indexPath);  // Fetch the directory's index file
+              const response = await fetch(decodedPath);  // Fetch the directory's index file
               if (!response.ok) {
                 throw new Error(`Failed to load directory index: ${response.statusText}`);
               }
@@ -196,8 +245,6 @@ const components = {
               if (newContent) {
                 document.querySelector('#content').innerHTML = newContent.innerHTML;
                 updateActiveLink();  // Update the active link after content is loaded
-              } else {
-                console.error("Content not found in the response HTML.");
               }
             } catch (error) {
               console.error(error);
@@ -217,8 +264,15 @@ const components = {
                 document.querySelector('#content').innerHTML = newContent.innerHTML;
                 history.pushState({}, '', decodedPath);  // Update the history with the decoded path
                 updateActiveLink();  // Update the active link after content is loaded
-              } else {
-                console.error("Content not found in the response HTML.");
+
+                // Collapse any open directories that are no longer active
+                const openDirectories = document.querySelectorAll('.max-h-screen');
+                openDirectories.forEach(dir => {
+                  const dirPath = dir.getAttribute('id');
+                  if (!decodedPath.startsWith(dirPath)) {
+                    toggleFolder(dirPath);
+                  }
+                });
               }
             } catch (error) {
               console.error(error);
