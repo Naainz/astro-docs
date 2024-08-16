@@ -11,18 +11,23 @@ function isDirectory(path) {
   return statSync(path).isDirectory();
 }
 
-// Function to read the frontmatter of an MDX file
-function getPageName(filePath) {
-  if (isDirectory(filePath)) return null; // Avoid reading directories
+// Function to read the frontmatter of an MDX file and return its name and path
+function getPageData(filePath, parentDir = '') {
+  if (isDirectory(filePath)) return null; // Skip directories
   const fileContent = readFileSync(filePath, 'utf8');
   const { data } = matter(fileContent);
-  return data.path || basename(filePath, '.mdx').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const fileName = basename(filePath, '.mdx');
+
+  // If the file is 'index.mdx', treat it as the root path or the parent directory path
+  const path = fileName === 'index' ? (parentDir || '/') : `/${parentDir}${fileName}`;
+  const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || 'Home' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  // Return the page's path and name
+  return { path, name, relativePath: join(parentDir, fileName + '.mdx') };
 }
 
 // Determine the current file based on the URL path
-const currentFile = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\/$/, '') + '.mdx';
-const githubEditUrl = `https://github.com/Naainz/astro-docs/edit/main/src/pages/${currentFile}`;
-const githubIssueUrl = `https://github.com/Naainz/astro-docs/issues/new?title=Feedback%20for%20“${encodeURIComponent(currentFile.replace('.mdx', ''))}”`;
+const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
 
 // Build the links structure from the config file
 const categories = sidebarConfig.order.map(category => {
@@ -38,33 +43,26 @@ const categories = sidebarConfig.order.map(category => {
     const fullPath = join(pagesDir, fileOrDir);
     if (isDirectory(fullPath)) {
       const dirFiles = readdirSync(fullPath)
-        .filter(file => file !== 'index.mdx' && file.endsWith('.mdx'))
-        .map(file => ({
-          name: getPageName(join(fullPath, file)),
-          path: `/${fileOrDir}/${basename(file, '.mdx')}`
-        }));
+        .filter(file => file.endsWith('.mdx') && file !== 'index.mdx') // Exclude 'index.mdx' from being listed as a separate file
+        .map(file => getPageData(join(fullPath, file), `${fileOrDir}/`))
+        .filter(Boolean); // Filter out null values
 
       return {
-        name: getPageName(fullPath) || fileOrDir,
+        name: getPageData(join(fullPath, 'index.mdx'), `${fileOrDir}/`)?.name || fileOrDir.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
         path: `/${fileOrDir}/`,
         isDirectory: true,
         items: dirFiles,
       };
     } else {
-      return {
-        name: getPageName(fullPath),
-        path: `/${basename(fileOrDir, '.mdx')}`
-      };
+      return getPageData(fullPath);
     }
-  });
+  }).filter(Boolean); // Filter out null values
 
   return {
     name: category.category,
     items: categoryItems
   };
 });
-
-const currentPath = Astro.url.pathname;
 ---
 
 <aside class="w-56 px-3 py-2 flex flex-col h-full">
@@ -160,16 +158,16 @@ const currentPath = Astro.url.pathname;
   <!-- New Text Links -->
   <div class="mt-6 space-y-3 flex-1 flex flex-col justify-end">
     <a 
-      href={githubIssueUrl} 
-      target="_blank"
+      href="#" 
+      id="feedback-link"
       class="block text-sm transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
     >
       Questions? Give us feedback
       <i class="fas fa-arrow-right"></i>
     </a>
     <a 
-      href={githubEditUrl} 
-      target="_blank"
+      href="#" 
+      id="edit-link"
       class="block text-sm transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
     >
       Edit this page on GitHub
@@ -185,3 +183,26 @@ const currentPath = Astro.url.pathname;
     </a>
   </div>
 </aside>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Function to generate and open the GitHub edit link
+    document.getElementById('edit-link').addEventListener('click', function(event) {
+      event.preventDefault();
+      const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+      const filePath = currentPath === '' ? 'index.mdx' : `${currentPath}.mdx`;
+      const githubBase = 'https://github.com/Naainz/astro-docs';
+      const editUrl = `${githubBase}/edit/main/src/pages/${filePath}`;
+      window.open(editUrl, '_blank');
+    });
+
+    // Function to generate and open the GitHub feedback issue link
+    document.getElementById('feedback-link').addEventListener('click', function(event) {
+      event.preventDefault();
+      const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+      const githubBase = 'https://github.com/Naainz/astro-docs';
+      const issueUrl = `${githubBase}/issues/new?title=Feedback%20for%20“${encodeURIComponent(currentPath || 'Home')}”`;
+      window.open(issueUrl, '_blank');
+    });
+  });
+</script>
