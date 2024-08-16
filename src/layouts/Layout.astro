@@ -63,7 +63,6 @@ const components = {
         <a href="/" class="text-2xl font-bold navbar-text">AstroDocs</a>
         <div class="flex items-center space-x-4">
           <a href="https://github.com/Naainz/astro-docs" target="_blank">
-            <!-- Use an absolute path for the GitHub icon -->
             <img src="/github-mark.svg" alt="GitHub Repository" style="height: 24px;" class="github-icon">
           </a>
           <button id="theme-toggle" class="hidden md:block focus:outline-none text-2xl">
@@ -95,7 +94,7 @@ const components = {
       <aside class="hidden md:block w-64">
         <Sidebar />
       </aside>
-      <main class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
+      <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <slot components={components} />
       </main>
     </div>
@@ -141,6 +140,32 @@ const components = {
               mobileMenuToggle.classList.remove('active');
             }, 500);
           }
+        });
+
+        // Handle client-side navigation
+        const links = document.querySelectorAll('a[href^="/"]');
+        links.forEach(link => {
+          link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            const response = await fetch(href);
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('#content').innerHTML;
+            document.querySelector('#content').innerHTML = newContent;
+            history.pushState({}, '', href);
+          });
+        });
+
+        // Handle back/forward navigation
+        window.addEventListener('popstate', async () => {
+          const response = await fetch(location.pathname);
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newContent = doc.querySelector('#content').innerHTML;
+          document.querySelector('#content').innerHTML = newContent;
         });
       });
     </script>
