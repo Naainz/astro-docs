@@ -39,7 +39,7 @@ import "../styles/global.css";
     </nav>
 
     <!-- Mobile Dropdown Menu (Hidden by Default) -->
-    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-300 pt-16 h-full">
+    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full">
       <div class="p-4 h-full">
         <!-- Sidebar Links (Displayed in the Mobile Menu) -->
         <div class="overflow-y-auto h-full">
@@ -56,7 +56,7 @@ import "../styles/global.css";
     </div>
 
     <!-- Main Content Area -->
-    <div id="main-content" class="container mx-auto px-4 flex mt-16 transition-opacity duration-300">
+    <div id="main-content" class="container mx-auto px-4 flex mt-16 transition-opacity duration-500">
       <!-- Sidebar (Visible only on Desktop) -->
       <aside class="hidden md:block w-64">
         <Sidebar />
@@ -74,6 +74,7 @@ import "../styles/global.css";
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mainContent = document.getElementById('main-content');
+        const body = document.body;
 
         // Toggle the mobile menu visibility with a drop-down effect
         mobileMenuToggle.addEventListener('click', () => {
@@ -83,14 +84,16 @@ import "../styles/global.css";
               mobileMenu.classList.remove('-translate-y-full');
               mobileMenu.classList.add('translate-y-0');
               mainContent.classList.add('opacity-50');
+              body.classList.add('bg-gray-800');
             }, 10); // Small delay to allow hidden removal before transition
           } else {
             mobileMenu.classList.remove('translate-y-0');
             mobileMenu.classList.add('-translate-y-full');
             mainContent.classList.remove('opacity-50');
+            body.classList.remove('bg-gray-800');
             setTimeout(() => {
               mobileMenu.classList.add('hidden');
-            }, 300); // Matches the duration of the transition
+            }, 500); // Matches the duration of the transition
           }
         });
 
@@ -102,9 +105,10 @@ import "../styles/global.css";
             mobileMenu.classList.remove('translate-y-0');
             mobileMenu.classList.add('-translate-y-full');
             mainContent.classList.remove('opacity-50');
+            body.classList.remove('bg-gray-800');
             setTimeout(() => {
               mobileMenu.classList.add('hidden');
-            }, 300); // Matches the duration of the transition
+            }, 500); // Matches the duration of the transition
           }
         });
       });
