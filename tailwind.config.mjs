@@ -1,17 +1,14 @@
 // tailwind.config.js
 module.exports = {
+	darkMode: 'class', // Enables dark mode by adding a 'dark' class
 	content: [
-	  './src/**/*.{js,ts,jsx,tsx,astro,mdx}',
+	  './src/**/*.{astro,html,js,jsx,ts,tsx,vue,svelte,mdx}',
 	],
 	theme: {
-	  extend: {
-		transitionProperty: {
-		  'colors': 'background-color, border-color, color, fill, stroke',
-		},
-	  },
+	  extend: {},
 	},
 	plugins: [
-		require('@tailwindcss/typography'),
-	  ],
-	darkMode: 'class',
+	  require('@tailwindcss/typography'), // Enables the 'prose' class
+	],
   }
+  

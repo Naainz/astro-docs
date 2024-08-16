@@ -35,15 +35,35 @@ const components = {
       .hamburger-icon.active .bottom-line {
         transform: translateY(-8px) rotate(-45deg);
       }
+      
+      /* Ensure GitHub icon and text adapt to dark mode */
+      .github-icon {
+        filter: invert(0); /* Default (light mode) */
+        transition: filter 0.3s ease;
+      }
+      .dark .github-icon {
+        filter: invert(1); /* Invert the color for dark mode */
+      }
+      .navbar-text {
+        color: #333; /* Default text color for light mode */
+        transition: color 0.3s ease;
+      }
+      .dark .navbar-text {
+        color: white; /* Text color in dark mode */
+      }
+      /* Dark mode text for the main content */
+      .dark .prose {
+        color: white; /* Text color for MDX content in dark mode */
+      }
     </style>
   </head>
   <body class="bg-gray-100 text-gray-900 transition-colors duration-500 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
     <nav class="bg-white dark:bg-gray-800 shadow mb-4 transition-colors duration-500 py-4 fixed top-0 inset-x-0 z-50">
       <div class="container mx-auto px-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-gray-900 dark:text-white">AstroDocs</a>
+        <a href="/" class="text-2xl font-bold navbar-text">AstroDocs</a>
         <div class="flex items-center space-x-4">
           <a href="https://github.com/Naainz/astro-docs" target="_blank">
-            <img src="github-mark.svg" alt="GitHub Repository" style="height: 24px;">
+            <img src="github-mark.svg" alt="GitHub Repository" style="height: 24px;" class="github-icon">
           </a>
           <button id="theme-toggle" class="hidden md:block focus:outline-none text-2xl">
             <i id="theme-toggle-icon" class="fas"></i>
@@ -74,7 +94,7 @@ const components = {
       <aside class="hidden md:block w-64">
         <Sidebar />
       </aside>
-      <main class="flex-1 md:ml-6 prose dark:prose-dark max-w-none">
+      <main class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <slot components={components} />
       </main>
     </div>
