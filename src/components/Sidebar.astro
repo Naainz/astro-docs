@@ -6,12 +6,11 @@ import sidebarConfig from '../config/sidebar.json';
 const pagesDir = new URL('../pages', import.meta.url).pathname;
 const files = readdirSync(pagesDir);
 
-// Function to check if a path is a directory
+// Server-side code: Runs during build time to generate the structure of the sidebar
 function isDirectory(path) {
   return statSync(path).isDirectory();
 }
 
-// Build the links structure from the config file
 const categories = sidebarConfig.order.map(category => {
   const categoryItems = category.items.map(fileOrDir => {
     const fullPath = join(pagesDir, fileOrDir);
@@ -45,7 +44,6 @@ const categories = sidebarConfig.order.map(category => {
 
 const currentPath = Astro.url.pathname;
 
-// Helper to check if a directory should be expanded
 function isExpanded(path) {
   return currentPath.startsWith(path);
 }
@@ -119,3 +117,66 @@ function isExpanded(path) {
     ))}
   </nav>
 </aside>
+
+<!-- Client-side JavaScript for dropdown and navigation -->
+<script>
+  const toggleDropdown = (event, path) => {
+    event.preventDefault();
+
+    const folder = document.getElementById(path);
+    if (folder) {
+      folder.classList.toggle('max-h-screen');
+      folder.classList.toggle('max-h-0');
+
+      const arrow = event.currentTarget.querySelector('svg');
+      if (arrow) {
+        arrow.classList.toggle('rotate-90');
+      }
+    }
+
+    // Reload the page to reflect changes
+    window.location.href = path;
+  };
+
+  const navigateAndLoad = async (event, path) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load content: ${response.statusText}`);
+      }
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newContent = doc.querySelector('#content');
+      if (newContent) {
+        document.querySelector('#content').innerHTML = newContent.innerHTML;
+        history.pushState({}, '', path);
+        updateActiveLink();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateActiveLink = () => {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('#sidebar-content a');
+    links.forEach(link => {
+      const isActive = link.getAttribute('href') === currentPath;
+      if (isActive) {
+        link.classList.add('bg-[#E0EFFF]', 'text-[#004CA3]');
+        link.classList.remove('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+      } else {
+        link.classList.remove('bg-[#E0EFFF]', 'text-[#004CA3]');
+        link.classList.add('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+      }
+    });
+  };
+
+  // Initial update of active link
+  document.addEventListener('DOMContentLoaded', () => {
+    updateActiveLink();
+  });
+</script>
