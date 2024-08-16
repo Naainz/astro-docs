@@ -4,7 +4,6 @@ import "../styles/global.css";
 import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
-import FlexSearch from 'flexsearch';
 
 const { title } = Astro.props;
 
@@ -17,30 +16,24 @@ const components = {
   h3: H3,
 };
 
-// Flatten the sidebar items to a single array of page titles and paths
-const pages = sidebarConfig.order.flatMap(category => 
-  category.items.map(item => {
-    if (typeof item === 'object' && item.redirect) {
-      return null; // Skip redirects in the search logic
-    }
-    const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
-    const name = typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name;
-    return { path, name };
-  }).filter(Boolean) // Remove null values
-);
-
-// Set up the FlexSearch index
-const searchIndex = new FlexSearch.Index();
-pages.forEach((page, idx) => {
-  searchIndex.add(idx, `${page.name} ${page.path}`);
-});
-
 // Function to determine the previous and next pages and their names
-const findPrevNext = (currentPath, pages) => {
+const findPrevNext = (currentPath, sidebarConfig) => {
   let prev = null;
   let next = null;
   let prevName = '';
   let nextName = '';
+
+  // Flatten the sidebar items to a single array of paths and names
+  const pages = sidebarConfig.order.flatMap(category => 
+    category.items.map(item => {
+      if (typeof item === 'object' && item.redirect) {
+        return null; // Skip redirects in the prev/next logic
+      }
+      const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
+      const name = typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name;
+      return { path, name };
+    }).filter(Boolean) // Remove null values from redirects
+  );
 
   const currentIndex = pages.findIndex(page => `/${page.path}` === currentPath);
 
@@ -56,7 +49,7 @@ const findPrevNext = (currentPath, pages) => {
   return { prev, next, prevName, nextName };
 };
 
-const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, pages);
+const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 ---
 
 <!DOCTYPE html>
@@ -146,56 +139,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
           display: block; /* Show the mobile toggle */
         }
       }
-
-      /* Styles for the search input */
-      .search-input {
-        padding: 0.5rem;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        width: 100%;
-        max-width: 300px;
-        font-size: 1rem;
-        color: #333;
-      }
-      .dark .search-input {
-        background-color: #2d3748;
-        border-color: #4a5568;
-        color: white;
-      }
-
-      /* Styles for search results */
-      .search-results {
-        background-color: #fff;
-        color: #333;
-        position: absolute;
-        z-index: 50;
-        max-height: 300px;
-        overflow-y: auto;
-        width: 100%;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        margin-top: 0.5rem;
-      }
-      .dark .search-results {
-        background-color: #2d3748;
-        color: white;
-        border-color: #4a5568;
-      }
-
-      .search-results a {
-        display: block;
-        padding: 0.5rem;
-        text-decoration: none;
-        color: inherit;
-      }
-      .search-results a:hover {
-        background-color: #f1f1f1;
-        color: #333;
-      }
-      .dark .search-results a:hover {
-        background-color: #4a5568;
-        color: white;
-      }
     </style>
   </head>
   <body class="bg-gray-100 text-gray-900 transition-colors duration-500 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
@@ -206,7 +149,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
           <a href="https://github.com/Naainz/astro-docs" target="_blank">
             <img src="/github-mark.svg" alt="GitHub Repository" style="height: 24px;" class="github-icon">
           </a>
-          <input id="search-input" type="text" class="search-input hidden md:block" placeholder="Search..." />
           <button id="theme-toggle" class="hidden md:block focus:outline-none text-2xl">
             <i id="theme-toggle-icon" class="fas"></i>
           </button>
@@ -221,8 +163,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
 
     <div id="mobile-menu" class="dropdown-menu fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full dark:bg-gray-800 dark:text-white">
       <div class="p-4 h-full">
-        <!-- Mobile Search Input -->
-        <input id="search-input-mobile" type="text" class="search-input w-full mb-4" placeholder="Search..." />
         <div id="sidebar-content" class="overflow-y-auto h-full">
           <Sidebar />
         </div>
@@ -242,8 +182,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <slot components={components} />
-        <!-- Search Results -->
-        <div id="search-results" class="search-results hidden"></div>
         <!-- Navigation Links at the Bottom -->
         <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
         <div class="nav-links">
@@ -271,9 +209,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mainContent = document.getElementById('main-content');
-        const searchInput = document.getElementById('search-input');
-        const searchInputMobile = document.getElementById('search-input-mobile');
-        const searchResults = document.getElementById('search-results');
         const body = document.body;
 
         mobileMenuToggle.addEventListener('click', () => {
@@ -323,35 +258,6 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, page
             }
           });
         };
-
-        const performSearch = (query) => {
-          const results = searchIndex.search(query);
-          searchResults.innerHTML = results
-            .map(idx => {
-              const page = pages[idx];
-              return `<a href="/${page.path}">${page.name}</a>`;
-            })
-            .join('');
-          searchResults.classList.remove('hidden');
-        };
-
-        searchInput.addEventListener('input', (e) => {
-          const query = e.target.value.trim();
-          if (query) {
-            performSearch(query);
-          } else {
-            searchResults.classList.add('hidden');
-          }
-        });
-
-        searchInputMobile.addEventListener('input', (e) => {
-          const query = e.target.value.trim();
-          if (query) {
-            performSearch(query);
-          } else {
-            searchResults.classList.add('hidden');
-          }
-        });
 
         const navigateAndToggle = async (event, path) => {
           event.preventDefault();
