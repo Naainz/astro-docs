@@ -1,0 +1,30 @@
+---
+import { readdirSync } from 'fs';
+import { basename, join } from 'path';
+import sidebarConfig from '../config/sidebar.json';
+
+const pagesDir = new URL('../pages', import.meta.url).pathname;
+const files = readdirSync(pagesDir);
+
+const order = sidebarConfig.order;
+
+const sortedFiles = order
+  .filter(file => files.includes(file))
+  .concat(files.filter(file => !order.includes(file) && file.endsWith('.mdx')));
+
+const links = sortedFiles.map(file => ({
+  name: basename(file, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
+  path: '/' + basename(file, '.mdx')
+}));
+---
+
+
+<aside class="w-64 p-4 bg-white dark:bg-gray-800 shadow-md rounded-md">
+  <nav class="space-y-2">
+    {links.map(link => (
+      <a href={link.path} class="block text-lg text-gray-900 dark:text-gray-100 hover:underline">
+        {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
+      </a>
+    ))}
+  </nav>
+</aside>
