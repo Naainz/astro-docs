@@ -94,6 +94,12 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, side
         color: white; /* Text color for MDX content in dark mode */
       }
 
+      /* Dark mode background for the dropdown menu */
+      .dark .dropdown-menu {
+        background-color: #1f2937; /* Dark mode background */
+        color: white; /* Dark mode text color */
+      }
+
       /* Styles for the navigation arrows at the bottom */
       .nav-links {
         display: flex;
@@ -140,7 +146,7 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, side
       </div>
     </nav>
 
-    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full">
+    <div id="mobile-menu" class="dropdown-menu fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full dark:bg-gray-800 dark:text-white">
       <div class="p-4 h-full">
         <div id="sidebar-content" class="overflow-y-auto h-full">
           <Sidebar />
