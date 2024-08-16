@@ -60,7 +60,7 @@ const components = {
   <body class="bg-gray-100 text-gray-900 transition-colors duration-500 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
     <nav class="bg-white dark:bg-gray-800 shadow mb-4 transition-colors duration-500 py-4 fixed top-0 inset-x-0 z-50">
       <div class="container mx-auto px-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold navbar-text">AstroDocs</a>
+        <a href="/" class="text-2xl font-bold navbar-text" onclick="navigateAndLoad(event, '/')">AstroDocs</a>
         <div class="flex items-center space-x-4">
           <a href="https://github.com/Naainz/astro-docs" target="_blank">
             <img src="/github-mark.svg" alt="GitHub Repository" style="height: 24px;" class="github-icon">
@@ -103,112 +103,82 @@ const components = {
     
     <script src="/src/scripts/theme.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mainContent = document.getElementById('main-content');
-        const sidebarContent = document.getElementById('sidebar-content');
-        const body = document.body;
+      const navigateAndLoad = async (event, path) => {
+        event.preventDefault();
 
-        mobileMenuToggle.addEventListener('click', () => {
-          mobileMenuToggle.classList.toggle('active');
-          if (mobileMenu.classList.contains('-translate-y-full')) {
-            mobileMenu.classList.remove('hidden');
-            setTimeout(() => {
-              mobileMenu.classList.remove('-translate-y-full');
-              mobileMenu.classList.add('translate-y-0');
-              mainContent.classList.add('opacity-50');
-              body.classList.add('bg-gray-800');
-            }, 10);
-          } else {
-            mobileMenu.classList.remove('translate-y-0');
-            mobileMenu.classList.add('-translate-y-full');
-            mainContent.classList.remove('opacity-50');
-            body.classList.remove('bg-gray-800');
-            setTimeout(() => {
-              mobileMenu.classList.add('hidden');
-            }, 500);
-          }
-        });
-
-        const mediaQuery = window.matchMedia('(min-width: 768px)');
-        mediaQuery.addEventListener('change', (e) => {
-          if (e.matches) {
-            mobileMenu.classList.remove('translate-y-0');
-            mobileMenu.classList.add('-translate-y-full');
-            mainContent.classList.remove('opacity-50');
-            body.classList.remove('bg-gray-800');
-            setTimeout(() => {
-              mobileMenu.classList.add('hidden');
-              mobileMenuToggle.classList.remove('active');
-            }, 500);
-          }
-        });
-
-        const updateActiveLink = () => {
-          const currentPath = window.location.pathname;
-          const links = document.querySelectorAll('#sidebar-content a');
-          links.forEach(link => {
-            const isActive = link.getAttribute('href') === currentPath;
-            if (isActive) {
-              link.classList.add('bg-[#E0EFFF]', 'text-[#004CA3]');
-              link.classList.remove('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
-            } else {
-              link.classList.remove('bg-[#E0EFFF]', 'text-[#004CA3]');
-              link.classList.add('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
-            }
-          });
-        };
-
-        // Attach navigateAndLoad function to the global scope
-        window.navigateAndLoad = async (event, path) => {
-          event.preventDefault();
+        // Only handle internal navigation
+        if (path && path.startsWith("/")) {
           try {
             const response = await fetch(path);
             if (!response.ok) {
               throw new Error(`Failed to load content: ${response.statusText}`);
             }
+            
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const newContent = doc.querySelector('#content');
+            const newContent = doc.querySelector('#content'); // Select the content part of the page
+            
             if (newContent) {
               document.querySelector('#content').innerHTML = newContent.innerHTML;
               history.pushState({}, '', path);
-              updateActiveLink();
+              updateActiveLink(); // Update the sidebar active link
+
+              // Execute any scripts from the loaded content
+              const scripts = newContent.querySelectorAll('script');
+              scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                if (oldScript.src) {
+                  newScript.src = oldScript.src;
+                } else {
+                  newScript.innerHTML = oldScript.innerHTML;
+                }
+                document.body.appendChild(newScript);
+              });
             }
           } catch (error) {
             console.error(error);
           }
-        };
+        }
+      };
 
-        // Handle client-side navigation
-        const links = document.querySelectorAll('a[href^="/"]');
+      const updateActiveLink = () => {
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll('#sidebar-content a');
         links.forEach(link => {
-          link.addEventListener('click', (e) => navigateAndLoad(e, link.getAttribute('href')));
-        });
-
-        // Handle back/forward navigation
-        window.addEventListener('popstate', async () => {
-          try {
-            const response = await fetch(location.pathname);
-            if (!response.ok) {
-              throw new Error(`Failed to load content: ${response.statusText}`);
-            }
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newContent = doc.querySelector('#content');
-            if (newContent) {
-              document.querySelector('#content').innerHTML = newContent.innerHTML;
-              updateActiveLink();
-            }
-          } catch (error) {
-            console.error(error);
+          const isActive = link.getAttribute('href') === currentPath;
+          if (isActive) {
+            link.classList.add('bg-[#E0EFFF]', 'text-[#004CA3]');
+            link.classList.remove('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+          } else {
+            link.classList.remove('bg-[#E0EFFF]', 'text-[#004CA3]');
+            link.classList.add('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
           }
         });
+      };
 
-        // Initial update of active link
+      // Handle popstate event for SPA navigation
+      window.addEventListener('popstate', async () => {
+        try {
+          const response = await fetch(location.pathname);
+          if (!response.ok) {
+            throw new Error(`Failed to load content: ${response.statusText}`);
+          }
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newContent = doc.querySelector('#content');
+          if (newContent) {
+            document.querySelector('#content').innerHTML = newContent.innerHTML;
+            updateActiveLink();
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      });
+
+      // Initial update of active link
+      document.addEventListener('DOMContentLoaded', () => {
         updateActiveLink();
       });
     </script>
