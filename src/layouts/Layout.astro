@@ -29,7 +29,7 @@ import "../styles/global.css";
             <i id="theme-toggle-icon" class="fas"></i>
           </button>
 
-          <!-- Mobile Hamburger Icon -->
+          <!-- Mobile Hamburger Icon (Visible only on small screens) -->
           <button id="mobile-menu-toggle" class="md:hidden focus:outline-none flex flex-col justify-center items-end p-2">
             <div class="w-6 h-0.5 bg-gray-900 dark:bg-white mb-1.5"></div>
             <div class="w-5 h-0.5 bg-gray-900 dark:bg-white"></div>
@@ -39,10 +39,10 @@ import "../styles/global.css";
     </nav>
 
     <!-- Mobile Dropdown Menu (Hidden by Default) -->
-    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-gray-900 text-white hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16">
-      <div class="p-4">
+    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-300 pt-16 h-full">
+      <div class="p-4 h-full">
         <!-- Sidebar Links (Displayed in the Mobile Menu) -->
-        <div class="overflow-y-auto">
+        <div class="overflow-y-auto h-full">
           <Sidebar />
         </div>
 
@@ -56,7 +56,7 @@ import "../styles/global.css";
     </div>
 
     <!-- Main Content Area -->
-    <div class="container mx-auto px-4 flex mt-16">
+    <div id="main-content" class="container mx-auto px-4 flex mt-16 transition-opacity duration-300">
       <!-- Sidebar (Visible only on Desktop) -->
       <aside class="hidden md:block w-64">
         <Sidebar />
@@ -72,34 +72,40 @@ import "../styles/global.css";
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileMenuClose = document.getElementById('mobile-menu-close');
         const mobileMenu = document.getElementById('mobile-menu');
+        const mainContent = document.getElementById('main-content');
 
         // Toggle the mobile menu visibility with a drop-down effect
         mobileMenuToggle.addEventListener('click', () => {
-          mobileMenu.classList.remove('hidden');
-          mobileMenu.classList.remove('-translate-y-full');
-          mobileMenu.classList.add('translate-y-0');
+          if (mobileMenu.classList.contains('-translate-y-full')) {
+            mobileMenu.classList.remove('hidden');
+            setTimeout(() => {
+              mobileMenu.classList.remove('-translate-y-full');
+              mobileMenu.classList.add('translate-y-0');
+              mainContent.classList.add('opacity-50');
+            }, 10); // Small delay to allow hidden removal before transition
+          } else {
+            mobileMenu.classList.remove('translate-y-0');
+            mobileMenu.classList.add('-translate-y-full');
+            mainContent.classList.remove('opacity-50');
+            setTimeout(() => {
+              mobileMenu.classList.add('hidden');
+            }, 300); // Matches the duration of the transition
+          }
         });
 
-        // Close the mobile menu
-        mobileMenuClose.addEventListener('click', () => {
-          mobileMenu.classList.add('-translate-y-full');
-          setTimeout(() => {
-            mobileMenu.classList.add('hidden');
-          }, 500); // Wait for the transition to complete before hiding
-        });
-
-        // Theme toggle buttons (only these should change the theme)
-        const themeToggle = document.getElementById('theme-toggle');
-        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
-
-        themeToggle.addEventListener('click', () => {
-          document.documentElement.classList.toggle('dark');
-        });
-
-        mobileThemeToggle.addEventListener('click', () => {
-          document.documentElement.classList.toggle('dark');
+        // Handle screen size changes
+        const mediaQuery = window.matchMedia('(min-width: 768px)');
+        mediaQuery.addEventListener('change', (e) => {
+          if (e.matches) {
+            // Close the mobile menu if screen size increases
+            mobileMenu.classList.remove('translate-y-0');
+            mobileMenu.classList.add('-translate-y-full');
+            mainContent.classList.remove('opacity-50');
+            setTimeout(() => {
+              mobileMenu.classList.add('hidden');
+            }, 300); // Matches the duration of the transition
+          }
         });
       });
     </script>
