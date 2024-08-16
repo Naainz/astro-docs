@@ -180,8 +180,31 @@ const components = {
           const decodedPath = decodeURIComponent(path);
 
           if (isDirectory) {
-            toggleFolder(decodedPath);  // Only toggle the folder if it's a directory
+            toggleFolder(decodedPath);  // Toggle the folder dropdown if it's a directory
+            history.pushState({}, '', decodedPath);  // Update URL without reloading
+
+            // Fetch and load the directory's index content
+            try {
+              const indexPath = `${decodedPath}`;  // Use the base directory path
+              const response = await fetch(indexPath);  // Fetch the directory's index file
+              if (!response.ok) {
+                throw new Error(`Failed to load directory index: ${response.statusText}`);
+              }
+              const html = await response.text();
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              const newContent = doc.querySelector('#content');
+              if (newContent) {
+                document.querySelector('#content').innerHTML = newContent.innerHTML;
+                updateActiveLink();  // Update the active link after content is loaded
+              } else {
+                console.error("Content not found in the response HTML.");
+              }
+            } catch (error) {
+              console.error(error);
+            }
           } else {
+            // Handle regular file loading
             try {
               const response = await fetch(decodedPath);  // Fetch the new content
               if (!response.ok) {
@@ -203,6 +226,9 @@ const components = {
             }
           }
         };
+
+
+
 
         // Attach navigateAndToggle function to the global scope
         window.navigateAndToggle = navigateAndToggle;
