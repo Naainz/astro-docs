@@ -14,56 +14,49 @@ import "../styles/global.css";
   </head>
   <body class="bg-gray-100 text-gray-900 transition-colors duration-500 dark:bg-gray-900 dark:text-gray-100 font-satoshi">
     <!-- Navbar -->
-    <nav class="bg-white dark:bg-gray-800 shadow mb-4 transition-colors duration-500 py-4">
+    <nav class="bg-white dark:bg-gray-800 shadow mb-4 transition-colors duration-500 py-4 fixed top-0 inset-x-0 z-50">
       <div class="container mx-auto px-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-gray-900 dark:text-white">AstroDocs</a>
         
-        <!-- Desktop Icons -->
-        <div class="hidden md:flex items-center space-x-4">
-          <button id="theme-toggle" class="focus:outline-none text-2xl">
-            <i id="theme-toggle-icon" class="fas"></i>
-          </button>
+        <!-- Icons (Visible on all devices) -->
+        <div class="flex items-center space-x-4">
           <a href="https://github.com/Naainz/astro-docs" target="_blank">
             <img src="github-mark.svg" alt="GitHub Repository" style="height: 24px;">
           </a>
-        </div>
 
-        <!-- Mobile Hamburger Icon -->
-        <div class="md:hidden">
-          <button id="mobile-menu-toggle" class="focus:outline-none text-2xl">
-            <i class="fas fa-bars"></i>
+          <!-- Desktop Theme Toggle -->
+          <button id="theme-toggle" class="hidden md:block focus:outline-none text-2xl">
+            <i id="theme-toggle-icon" class="fas"></i>
+          </button>
+
+          <!-- Mobile Hamburger Icon -->
+          <button id="mobile-menu-toggle" class="md:hidden focus:outline-none flex flex-col justify-center items-end p-2">
+            <div class="w-6 h-0.5 bg-gray-900 dark:bg-white mb-1.5"></div>
+            <div class="w-5 h-0.5 bg-gray-900 dark:bg-white"></div>
           </button>
         </div>
       </div>
     </nav>
 
     <!-- Mobile Dropdown Menu (Hidden by Default) -->
-    <div id="mobile-menu" class="fixed inset-0 bg-gray-900 text-white hidden z-50 p-4">
-      <div class="flex justify-between items-center mb-4">
-        <span class="text-2xl font-bold">Menu</span>
-        <button id="mobile-menu-close" class="focus:outline-none text-2xl">
-          <i class="fas fa-times"></i> <!-- Close Icon -->
-        </button>
-      </div>
-      
-      <!-- Sidebar Links (Displayed in the Mobile Menu) -->
-      <div class="overflow-y-auto">
-        <Sidebar />
-      </div>
+    <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-gray-900 text-white hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16">
+      <div class="p-4">
+        <!-- Sidebar Links (Displayed in the Mobile Menu) -->
+        <div class="overflow-y-auto">
+          <Sidebar />
+        </div>
 
-      <!-- Mobile Icons -->
-      <div class="flex items-center space-x-4 mt-4">
-        <button id="mobile-theme-toggle" class="focus:outline-none text-2xl">
-          <i id="mobile-theme-toggle-icon" class="fas"></i>
-        </button>
-        <a href="https://github.com/Naainz/astro-docs" target="_blank">
-          <img src="github-mark.svg" alt="GitHub Repository" style="height: 24px;">
-        </a>
+        <!-- Mobile Theme Toggle (Visible in Mobile Menu) -->
+        <div class="flex items-center space-x-4 mt-4">
+          <button id="mobile-theme-toggle" class="focus:outline-none text-2xl">
+            <i id="mobile-theme-toggle-icon" class="fas"></i>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Main Content Area -->
-    <div class="container mx-auto px-4 flex">
+    <div class="container mx-auto px-4 flex mt-16">
       <!-- Sidebar (Visible only on Desktop) -->
       <aside class="hidden md:block w-64">
         <Sidebar />
@@ -82,12 +75,31 @@ import "../styles/global.css";
         const mobileMenuClose = document.getElementById('mobile-menu-close');
         const mobileMenu = document.getElementById('mobile-menu');
 
+        // Toggle the mobile menu visibility with a drop-down effect
         mobileMenuToggle.addEventListener('click', () => {
           mobileMenu.classList.remove('hidden');
+          mobileMenu.classList.remove('-translate-y-full');
+          mobileMenu.classList.add('translate-y-0');
         });
 
+        // Close the mobile menu
         mobileMenuClose.addEventListener('click', () => {
-          mobileMenu.classList.add('hidden');
+          mobileMenu.classList.add('-translate-y-full');
+          setTimeout(() => {
+            mobileMenu.classList.add('hidden');
+          }, 500); // Wait for the transition to complete before hiding
+        });
+
+        // Theme toggle buttons (only these should change the theme)
+        const themeToggle = document.getElementById('theme-toggle');
+        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+
+        themeToggle.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+        });
+
+        mobileThemeToggle.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
         });
       });
     </script>
