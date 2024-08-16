@@ -1,7 +1,7 @@
 // tailwind.config.js
 module.exports = {
 	content: [
-	  './src/**/*.{js,ts,jsx,tsx,astro}',
+	  './src/**/*.{js,ts,jsx,tsx,astro,mdx}',
 	],
 	theme: {
 	  extend: {
@@ -10,6 +10,8 @@ module.exports = {
 		},
 	  },
 	},
-	plugins: [],
-	darkMode: 'class', // Enable class-based dark mode
+	plugins: [
+		require('@tailwindcss/typography'),
+	  ],
+	darkMode: 'class',
   }

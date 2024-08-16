@@ -1,4 +1,5 @@
 ---
+const { title } = Astro.props;
 import Sidebar from '../components/Sidebar.astro';
 import "../styles/global.css";
 ---
@@ -8,7 +9,7 @@ import "../styles/global.css";
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astro Documentation Engine</title>
+    <title>{title || "AstroDocs"}</title>
     <link rel="stylesheet" href="/src/styles/global.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
@@ -63,7 +64,7 @@ import "../styles/global.css";
       <aside class="hidden md:block w-64">
         <Sidebar />
       </aside>
-      <main class="flex-1 md:ml-6">
+      <main class="flex-1 md:ml-6 prose dark:prose-dark max-w-none">
         <slot />
       </main>
     </div>
