@@ -101,38 +101,49 @@ const components = {
     
     <script src="/src/scripts/theme.js"></script>
     <script>
+      const cache = {};
+
+      const preloadPage = async (path) => {
+        if (!cache[path]) {
+          try {
+            const response = await fetch(path);
+            if (!response.ok) {
+              throw new Error(`Failed to preload content: ${response.statusText}`);
+            }
+            const html = await response.text();
+            cache[path] = html;
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      };
+
       const navigateAndLoad = async (event, path) => {
         event.preventDefault();
 
-        // Only handle internal navigation
-        if (path && path.startsWith("/")) {
+        if (cache[path]) {
+          const doc = new DOMParser().parseFromString(cache[path], 'text/html');
+          const newContent = doc.querySelector('#content');
+          if (newContent) {
+            document.querySelector('#content').innerHTML = newContent.innerHTML;
+            history.pushState({}, '', path);
+            updateActiveLink();
+          }
+        } else {
           try {
             const response = await fetch(path);
             if (!response.ok) {
               throw new Error(`Failed to load content: ${response.statusText}`);
             }
-            
             const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newContent = doc.querySelector('#content'); // Select the content part of the page
-            
+            cache[path] = html;
+
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('#content');
             if (newContent) {
               document.querySelector('#content').innerHTML = newContent.innerHTML;
               history.pushState({}, '', path);
-              updateActiveLink(); // Update the sidebar active link
-
-              // Execute any scripts from the loaded content
-              const scripts = newContent.querySelectorAll('script');
-              scripts.forEach(oldScript => {
-                const newScript = document.createElement('script');
-                if (oldScript.src) {
-                  newScript.src = oldScript.src;
-                } else {
-                  newScript.innerHTML = oldScript.innerHTML;
-                }
-                document.body.appendChild(newScript);
-              });
+              updateActiveLink();
             }
           } catch (error) {
             console.error(error);
@@ -155,28 +166,17 @@ const components = {
         });
       };
 
-      // Handle popstate event for SPA navigation
-      window.addEventListener('popstate', async () => {
-        try {
-          const response = await fetch(location.pathname);
-          if (!response.ok) {
-            throw new Error(`Failed to load content: ${response.statusText}`);
-          }
-          const html = await response.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newContent = doc.querySelector('#content');
-          if (newContent) {
-            document.querySelector('#content').innerHTML = newContent.innerHTML;
-            updateActiveLink();
-          }
-        } catch (error) {
-          console.error(error);
-        }
+      window.addEventListener('popstate', () => {
+        navigateAndLoad(new Event('popstate'), window.location.pathname);
       });
 
-      // Initial update of active link
       document.addEventListener('DOMContentLoaded', () => {
+        // Preload the next pages linked in the sidebar
+        const links = document.querySelectorAll('#sidebar-content a');
+        links.forEach(link => {
+          const path = link.getAttribute('href');
+          preloadPage(path);
+        });
         updateActiveLink();
       });
     </script>
