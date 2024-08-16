@@ -10,7 +10,7 @@
     },
     {
       "category": "More",
-      "items": ["info.mdx"]
+      "items": ["info.mdx", "more"]
     }
   ]
 }
