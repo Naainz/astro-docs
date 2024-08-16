@@ -1,6 +1,7 @@
 ---
-import { readdirSync, statSync } from 'fs';
+import { readdirSync, statSync, readFileSync } from 'fs';
 import { basename, join } from 'path';
+import matter from 'gray-matter';
 import sidebarConfig from '../config/sidebar.json';
 
 const pagesDir = new URL('../pages', import.meta.url).pathname;
@@ -11,6 +12,13 @@ function isDirectory(path) {
   return statSync(path).isDirectory();
 }
 
+// Function to read the frontmatter of an MDX file
+function getPageName(filePath) {
+  const fileContent = readFileSync(filePath, 'utf8');
+  const { data } = matter(fileContent);
+  return data.path || basename(filePath, '.mdx').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
 // Build the links structure from the config file
 const categories = sidebarConfig.order.map(category => {
   const categoryItems = category.items.map(fileOrDir => {
@@ -19,7 +27,7 @@ const categories = sidebarConfig.order.map(category => {
       const dirFiles = readdirSync(fullPath)
         .filter(file => file !== 'index.mdx' && file.endsWith('.mdx'))
         .map(file => ({
-          name: basename(file, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
+          name: getPageName(join(fullPath, file)),
           path: `/${fileOrDir}/${basename(file, '.mdx')}`
         }));
 
@@ -31,7 +39,7 @@ const categories = sidebarConfig.order.map(category => {
       };
     } else {
       return {
-        name: basename(fileOrDir, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
+        name: getPageName(fullPath),
         path: `/${basename(fileOrDir, '.mdx')}`
       };
     }
@@ -88,7 +96,7 @@ const currentPath = Astro.url.pathname;
                           : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected files in folder: Dark mode color #A3A3A3
                       }`}
                     >
-                      {subLink.name.charAt(0).toUpperCase() + subLink.name.slice(1)}
+                      {subLink.name}
                     </a>
                   ))}
                 </div>
@@ -102,7 +110,7 @@ const currentPath = Astro.url.pathname;
                     : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected files: Dark mode color #A3A3A3
                 }`}
               >
-                {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
+                {link.name}
               </a>
             )}
           </div>
