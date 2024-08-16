@@ -16,13 +16,21 @@ const links = sortedFiles.map(file => ({
   name: basename(file, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
   path: '/' + basename(file, '.mdx')
 }));
+
+const currentPath = Astro.url.pathname;
 ---
 
-
-<aside class="w-64 p-4 bg-white dark:bg-gray-800 shadow-md rounded-md">
+<aside class="w-56 px-3 py-2">
   <nav class="space-y-2">
     {links.map(link => (
-      <a href={link.path} class="block text-lg text-gray-900 dark:text-gray-100 hover:underline">
+      <a 
+        href={link.path} 
+        class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 ${
+          currentPath === link.path 
+            ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected button: Background #E0EFFF, text #004CA3
+            : 'text-[#6B7280] hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected buttons: Text #6B7280, hover effect light gray
+        }`}
+      >
         {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
       </a>
     ))}
