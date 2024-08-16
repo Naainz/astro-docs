@@ -1,7 +1,16 @@
 {
-    "order": [
-      "introduction.mdx",
-      "demo.mdx"
-    ]
-  }
-  
+  "order": [
+    {
+      "category": "Introduction",
+      "items": ["introduction.mdx", "demo.mdx"]
+    },
+    {
+      "category": "Themes",
+      "items": ["theme.mdx"]
+    },
+    {
+      "category": "More",
+      "items": ["info.mdx"]
+    }
+  ]
+}

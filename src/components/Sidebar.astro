@@ -1,38 +1,49 @@
 ---
 import { readdirSync } from 'fs';
-import { basename, join } from 'path';
+import { basename } from 'path';
 import sidebarConfig from '../config/sidebar.json';
 
 const pagesDir = new URL('../pages', import.meta.url).pathname;
 const files = readdirSync(pagesDir);
 
-const order = sidebarConfig.order;
-
-const sortedFiles = order
-  .filter(file => files.includes(file))
-  .concat(files.filter(file => !order.includes(file) && file.endsWith('.mdx')));
-
-const links = sortedFiles.map(file => ({
-  name: basename(file, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
-  path: '/' + basename(file, '.mdx')
-}));
-
 const currentPath = Astro.url.pathname;
+
+// Build the links structure from the config file
+const categories = sidebarConfig.order.map(category => {
+  const categoryItems = category.items
+    .filter(file => files.includes(file))
+    .map(file => ({
+      name: basename(file, '.mdx').replace(/-/g, ' ').replace(/_/g, ' '),
+      path: '/' + basename(file, '.mdx')
+    }));
+  
+  return {
+    name: category.category,
+    items: categoryItems
+  };
+});
 ---
 
 <aside class="w-56 px-3 py-2">
-  <nav class="space-y-2">
-    {links.map(link => (
-      <a 
-        href={link.path} 
-        class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 ${
-          currentPath === link.path 
-            ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected button: Background #E0EFFF, text #004CA3
-            : 'text-[#6B7280] hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected buttons: Text #6B7280, hover effect light gray
-        }`}
-      >
-        {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
-      </a>
+  <nav>
+    {categories.map((category, index) => (
+      <div class={`space-y-2 ${index !== 0 ? 'mt-6' : ''}`}>  <!-- Add extra spacing between categories -->
+        <h3 class="text-sm font-bold text-gray-600 pl-3">
+          {category.name}
+        </h3>
+        {category.items.map(link => (
+          <a 
+            href={link.path} 
+            class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 ${
+              currentPath === link.path 
+                ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected button: Background #E0EFFF, text #004CA3
+                : 'text-[#6B7280] hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected buttons: Text #6B7280, hover effect light gray
+            }`}
+          >
+            {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
+          </a>
+        ))}
+      </div>
     ))}
   </nav>
 </aside>
