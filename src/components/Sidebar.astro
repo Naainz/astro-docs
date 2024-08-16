@@ -5,7 +5,6 @@ import matter from 'gray-matter';
 import sidebarConfig from '../config/sidebar.json';
 
 const pagesDir = new URL('../pages', import.meta.url).pathname;
-const files = readdirSync(pagesDir);
 
 // Function to check if a path is a directory
 function isDirectory(path) {
@@ -23,6 +22,14 @@ function getPageName(filePath) {
 // Build the links structure from the config file
 const categories = sidebarConfig.order.map(category => {
   const categoryItems = category.items.map(fileOrDir => {
+    if (typeof fileOrDir === 'object' && fileOrDir.redirect) {
+      // Handle redirect links
+      return {
+        name: fileOrDir.name,
+        redirect: fileOrDir.redirect
+      };
+    }
+
     const fullPath = join(pagesDir, fileOrDir);
     if (isDirectory(fullPath)) {
       const dirFiles = readdirSync(fullPath)
@@ -59,12 +66,32 @@ const currentPath = Astro.url.pathname;
   <nav>
     {categories.map((category, index) => (
       <div class={`space-y-2 ${index !== 0 ? 'mt-10' : ''}`} key={index}>
-        <h3 class="text-sm font-bold text-gray-600 dark:text-white pl-3">
-          {category.name}
-        </h3>
+        {category.name && (
+          <h3 class="text-sm font-bold text-gray-600 dark:text-white pl-3">
+            {category.name}
+          </h3>
+        )}
         {category.items.map((link, linkIndex) => (
           <div key={linkIndex}>
-            {link.isDirectory ? (
+            {link.redirect ? (
+              <a 
+                href={link.redirect} 
+                target="_blank"
+                rel="noopener noreferrer"
+                class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 text-[#004CA3] dark:text-white hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800 flex items-center justify-between`}
+              >
+                <span>{link.name}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 transform transition-transform duration-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l10-10M7 7h10v10" />
+                </svg>
+              </a>
+            ) : link.isDirectory ? (
               <div>
                 <a 
                   href={link.path} 
@@ -75,7 +102,7 @@ const currentPath = Astro.url.pathname;
                       : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected folder: Dark mode color #A3A3A3
                   }`}
                 >
-                  <span>{link.name.charAt(0).toUpperCase() + link.name.slice(1)}</span>
+                  <span>{link.name}</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     class="h-4 w-4 transform transition-transform duration-300 rotate-90"  // Arrow always rotated 90 degrees to indicate open

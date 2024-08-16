@@ -9,7 +9,14 @@
     },
     {
       "category": "More",
-      "items": ["info.mdx", "more"]
+      "items": [
+        "info.mdx",
+        "more",
+        {
+          "name": "Author",
+          "redirect": "https://www.naai.nz"
+        }
+      ]
     }
   ]
 }

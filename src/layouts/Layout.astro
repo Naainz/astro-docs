@@ -23,12 +23,17 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   let prevName = '';
   let nextName = '';
 
-  const pages = sidebarConfig.order.flatMap(category => category.items.map(item => {
-    return {
-      path: typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', ''),
-      name: typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name
-    };
-  }));
+  // Flatten the sidebar items to a single array of paths and names
+  const pages = sidebarConfig.order.flatMap(category => 
+    category.items.map(item => {
+      if (typeof item === 'object' && item.redirect) {
+        return null; // Skip redirects in the prev/next logic
+      }
+      const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
+      const name = typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name;
+      return { path, name };
+    }).filter(Boolean) // Remove null values from redirects
+  );
 
   const currentIndex = pages.findIndex(page => `/${page.path}` === currentPath);
 
