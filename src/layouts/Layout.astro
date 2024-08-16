@@ -35,7 +35,7 @@ const components = {
       .hamburger-icon.active .bottom-line {
         transform: translateY(-8px) rotate(-45deg);
       }
-      
+
       /* Ensure GitHub icon and text adapt to dark mode */
       .github-icon {
         filter: invert(0); /* Default (light mode) */
@@ -100,14 +100,13 @@ const components = {
         <slot components={components} />
       </main>
     </div>
-    
+
     <script src="/src/scripts/theme.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mainContent = document.getElementById('main-content');
-        const sidebarContent = document.getElementById('sidebar-content');
         const body = document.body;
 
         mobileMenuToggle.addEventListener('click', () => {
@@ -131,20 +130,19 @@ const components = {
           }
         });
 
-        const mediaQuery = window.matchMedia('(min-width: 768px)');
-        mediaQuery.addEventListener('change', (e) => {
-          if (e.matches) {
-            mobileMenu.classList.remove('translate-y-0');
-            mobileMenu.classList.add('-translate-y-full');
-            mainContent.classList.remove('opacity-50');
-            body.classList.remove('bg-gray-800');
-            setTimeout(() => {
-              mobileMenu.classList.add('hidden');
-              mobileMenuToggle.classList.remove('active');
-            }, 500);
+        const toggleFolder = (path) => {
+          const folder = document.getElementById(path);
+          if (folder) {
+            folder.classList.toggle('max-h-screen');
+            folder.classList.toggle('max-h-0');
+            const arrow = document.querySelector(`a[href="${path}"] svg`);
+            if (arrow) {
+              arrow.classList.toggle('rotate-90');
+            }
           }
-        });
+        };
 
+        // Function to update the active link based on the current path
         const updateActiveLink = () => {
           const currentPath = window.location.pathname;
           const links = document.querySelectorAll('#sidebar-content a');
@@ -160,18 +158,7 @@ const components = {
           });
         };
 
-        const toggleFolder = (path) => {
-          const folder = document.getElementById(path);
-          if (folder) {
-            folder.classList.toggle('max-h-screen');
-            folder.classList.toggle('max-h-0');
-            const arrow = document.querySelector(`a[href="${path}"] svg`);
-            if (arrow) {
-              arrow.classList.toggle('rotate-90');
-            }
-          }
-        };
-
+        // Function to handle navigation and toggling of folders
         const navigateAndToggle = async (event, path) => {
           event.preventDefault();
 
@@ -184,8 +171,8 @@ const components = {
 
             // Fetch and load the directory's index content
             try {
-              const indexPath = `${decodedPath}`;  // Use the base directory path
-              const response = await fetch(indexPath);  // Fetch the directory's index file
+              const indexPath = `${decodedPath}`;
+              const response = await fetch(indexPath);
               if (!response.ok) {
                 throw new Error(`Failed to load directory index: ${response.statusText}`);
               }
@@ -205,7 +192,7 @@ const components = {
           } else {
             // Handle regular file loading
             try {
-              const response = await fetch(decodedPath);  // Fetch the new content
+              const response = await fetch(decodedPath);
               if (!response.ok) {
                 throw new Error(`Failed to load content: ${response.statusText}`);
               }
