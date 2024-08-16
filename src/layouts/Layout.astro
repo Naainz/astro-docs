@@ -79,7 +79,7 @@ const components = {
 
     <div id="mobile-menu" class="fixed top-0 inset-x-0 bg-white text-gray-900 hidden z-40 transform -translate-y-full transition-transform duration-500 pt-16 h-full">
       <div class="p-4 h-full">
-        <div class="overflow-y-auto h-full">
+        <div id="sidebar-content" class="overflow-y-auto h-full">
           <Sidebar />
         </div>
         <div class="flex items-center space-x-4 mt-4">
@@ -92,7 +92,9 @@ const components = {
 
     <div id="main-content" class="container mx-auto px-4 flex mt-24 transition-opacity duration-500">
       <aside class="hidden md:block w-64">
-        <Sidebar />
+        <div id="sidebar-content">
+          <Sidebar />
+        </div>
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <slot components={components} />
@@ -105,6 +107,7 @@ const components = {
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mainContent = document.getElementById('main-content');
+        const sidebarContent = document.getElementById('sidebar-content');
         const body = document.body;
 
         mobileMenuToggle.addEventListener('click', () => {
@@ -142,6 +145,34 @@ const components = {
           }
         });
 
+        const updateActiveLink = () => {
+          const currentPath = window.location.pathname;
+          const links = document.querySelectorAll('#sidebar-content a');
+          links.forEach(link => {
+            const isActive = link.getAttribute('href') === currentPath;
+            if (isActive) {
+              link.classList.add('bg-[#E0EFFF]', 'text-[#004CA3]');
+              link.classList.remove('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+            } else {
+              link.classList.remove('bg-[#E0EFFF]', 'text-[#004CA3]');
+              link.classList.add('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+            }
+          });
+        };
+
+        const toggleFolder = (event, path) => {
+          event.preventDefault();
+          const folder = document.getElementById(path);
+          if (folder) {
+            folder.classList.toggle('max-h-screen');
+            folder.classList.toggle('max-h-0');
+            const arrow = event.currentTarget.querySelector('svg');
+            if (arrow) {
+              arrow.classList.toggle('rotate-90');
+            }
+          }
+        };
+
         // Handle client-side navigation
         const links = document.querySelectorAll('a[href^="/"]');
         links.forEach(link => {
@@ -153,8 +184,19 @@ const components = {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newContent = doc.querySelector('#content').innerHTML;
+            const newSidebar = doc.querySelector('#sidebar-content').innerHTML;
             document.querySelector('#content').innerHTML = newContent;
+            document.querySelector('#sidebar-content').innerHTML = newSidebar;
             history.pushState({}, '', href);
+            updateActiveLink();  // Update the active link after content is loaded
+
+            // Reapply folder toggle logic
+            const newLinks = document.querySelectorAll('a[href^="/"]');
+            newLinks.forEach(newLink => {
+              if (newLink.closest('.sidebar-folder')) {
+                newLink.addEventListener('click', (event) => toggleFolder(event, newLink.getAttribute('href')));
+              }
+            });
           });
         });
 
@@ -165,8 +207,22 @@ const components = {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           const newContent = doc.querySelector('#content').innerHTML;
+          const newSidebar = doc.querySelector('#sidebar-content').innerHTML;
           document.querySelector('#content').innerHTML = newContent;
+          document.querySelector('#sidebar-content').innerHTML = newSidebar;
+          updateActiveLink();  // Update the active link when navigating via history
+
+          // Reapply folder toggle logic
+          const newLinks = document.querySelectorAll('a[href^="/"]');
+          newLinks.forEach(newLink => {
+            if (newLink.closest('.sidebar-folder')) {
+              newLink.addEventListener('click', (event) => toggleFolder(event, newLink.getAttribute('href')));
+            }
+          });
         });
+
+        // Initial update of active link
+        updateActiveLink();
       });
     </script>
   </body>
