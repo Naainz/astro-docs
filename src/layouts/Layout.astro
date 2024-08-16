@@ -1,7 +1,17 @@
 ---
-const { title } = Astro.props;
 import Sidebar from '../components/Sidebar.astro';
 import "../styles/global.css";
+import H1 from '../components/H1.astro';
+import H2 from '../components/H2.astro';
+import H3 from '../components/H3.astro';
+
+const { title } = Astro.props;
+
+const components = {
+  h1: H1,
+  h2: H2,
+  h3: H3,
+};
 ---
 
 <!DOCTYPE html>
@@ -65,7 +75,7 @@ import "../styles/global.css";
         <Sidebar />
       </aside>
       <main class="flex-1 md:ml-6 prose dark:prose-dark max-w-none">
-        <slot />
+        <slot components={components} />
       </main>
     </div>
     
