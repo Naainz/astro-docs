@@ -6,11 +6,12 @@ import sidebarConfig from '../config/sidebar.json';
 const pagesDir = new URL('../pages', import.meta.url).pathname;
 const files = readdirSync(pagesDir);
 
-// Server-side code: Runs during build time to generate the structure of the sidebar
+// Function to check if a path is a directory
 function isDirectory(path) {
   return statSync(path).isDirectory();
 }
 
+// Build the links structure from the config file
 const categories = sidebarConfig.order.map(category => {
   const categoryItems = category.items.map(fileOrDir => {
     const fullPath = join(pagesDir, fileOrDir);
@@ -44,6 +45,7 @@ const categories = sidebarConfig.order.map(category => {
 
 const currentPath = Astro.url.pathname;
 
+// Helper to check if a directory should be expanded
 function isExpanded(path) {
   return currentPath.startsWith(path);
 }
@@ -52,27 +54,28 @@ function isExpanded(path) {
 <aside class="w-56 px-3 py-2">
   <nav>
     {categories.map((category, index) => (
-      <div class={`space-y-2 ${index !== 0 ? 'mt-10' : ''}`} key={category.name}>
+      <div class={`space-y-2 ${index !== 0 ? 'mt-10' : ''}`} key={index}>
         <h3 class="text-sm font-bold text-gray-600 dark:text-white pl-3">
           {category.name}
         </h3>
-        {category.items.map(link => (
-          <div key={link.path}>
+        {category.items.map((link, linkIndex) => (
+          <>
             {link.isDirectory ? (
-              <>
+              <div key={linkIndex}>
                 <a 
                   href={link.path} 
-                  class={`block px-3 py-1.5 rounded-md text-base font-medium flex items-center justify-between ${
-                    currentPath.startsWith(link.path)
+                  data-directory 
+                  class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 flex items-center justify-between ${
+                    currentPath === link.path 
                       ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected folder: Background #E0EFFF, text #004CA3
                       : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected folder: Dark mode color #A3A3A3
                   }`}
-                  onclick={`navigateAndLoad(event, '${link.path}')`}
+                  onclick={`navigateAndToggle(event, '${link.path}')`}
                 >
                   <span>{link.name.charAt(0).toUpperCase() + link.name.slice(1)}</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class={`h-4 w-4 ${
+                    class={`h-4 w-4 transform transition-transform duration-300 ${
                       isExpanded(link.path) ? 'rotate-90' : 'rotate-0'
                     }`}
                     fill="none"
@@ -82,39 +85,37 @@ function isExpanded(path) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
-                <div id="{link.path}" class={`ml-4 mt-2 space-y-2 overflow-hidden ${
-                  isExpanded(link.path) ? 'max-h-screen' : 'max-h-0'
-                }`}>
-                  {link.items.map(subLink => (
+                <div id="${link.path}" class={`ml-4 mt-2 space-y-2 transition-max-height duration-500 ease-in-out overflow-hidden ${isExpanded(link.path) ? 'max-h-screen' : 'max-h-0'}`}>
+                  {link.items.map((subLink, subLinkIndex) => (
                     <a 
+                      key={subLinkIndex}
                       href={subLink.path} 
-                      class={`block px-3 py-1.5 rounded-md text-base font-medium ${
+                      class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 ${
                         currentPath === subLink.path 
                           ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected file in folder: Background #E0EFFF, text #004CA3
                           : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected files in folder: Dark mode color #A3A3A3
                       }`}
-                      key={subLink.path}
-                      onclick={`navigateAndLoad(event, '${subLink.path}')`}
                     >
                       {subLink.name.charAt(0).toUpperCase() + subLink.name.slice(1)}
                     </a>
                   ))}
                 </div>
-              </>
+              </div>
             ) : (
               <a 
+                key={linkIndex}
                 href={link.path} 
-                class={`block px-3 py-1.5 rounded-md text-base font-medium ${
+                class={`block px-3 py-1.5 rounded-md text-base font-medium transition-colors duration-300 ${
                   currentPath === link.path 
                     ? 'bg-[#E0EFFF] text-[#004CA3]'  // Selected button: Background #E0EFFF, text #004CA3
                     : 'text-[#6B7280] dark:text-[#A3A3A3] opacity-75 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-800'  // Non-selected buttons: Dark mode color #A3A3A3
                 }`}
-                onclick={`navigateAndLoad(event, '${link.path}')`}
+                onclick={`navigateAndToggle(event, '${link.path}')`}
               >
                 {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
               </a>
             )}
-          </div>
+          </>
         ))}
       </div>
     ))}
