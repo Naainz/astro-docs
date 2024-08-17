@@ -18,18 +18,16 @@ const components = {
   h2: H2,
   h3: H3,
   pre: ({ children, ...props }) => {
-    const { children: codeChild } = children.props;
     const codeProps = children.props;
-    const filename = codeProps.metastring ? codeProps.metastring.match(/name="(.+?)"/)?.[1] : null;
+    const metastring = codeProps.metastring || '';
+    const filename = metastring.match(/name="(.+?)"/)?.[1];
 
     return filename
-      ? Astro.html`<div class="custom-code-block">
-          <div class="code-block-header">
-            <span>${filename}</span>
-          </div>
-          <pre class="${codeProps.className}" {...props}>${codeChild}</pre>
+      ? Astro.html`<div style="margin-bottom: 1rem;">
+          <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">${filename}</div>
+          <pre ${props} class="${codeProps.className}">${codeProps.children}</pre>
         </div>`
-      : Astro.html`<pre class="${codeProps.className}" {...props}>${codeChild}</pre>`;
+      : Astro.html`<pre ${props} class="${codeProps.className}">${codeProps.children}</pre>`;
   },
 };
 
@@ -231,15 +229,11 @@ const breadcrumb = [
         position: relative;
         margin-bottom: 1.5rem;
       }
-      .code-block-header {
-        position: absolute;
-        top: -1.25rem;
-        left: 1rem;
-        background-color: #f5f5f5;
-        padding: 0.25rem 0.75rem;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
+      .code-block-filename {
+        font-size: 0.875rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
       }
 
       pre {
