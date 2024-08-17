@@ -9,9 +9,6 @@ const { title } = Astro.props;
 
 // Import and parse the sidebar configuration
 import sidebarConfig from '../config/sidebar.json';
-import { readdirSync, statSync, readFileSync } from 'fs';
-import { basename, join } from 'path';
-import matter from 'gray-matter';
 
 const components = {
   h1: H1,
@@ -19,93 +16,41 @@ const components = {
   h3: H3,
 };
 
-// Function to check if a path is a directory
-function isDirectory(path) {
-  return statSync(path).isDirectory();
-}
+// Function to determine the previous and next pages and their names
+const findPrevNext = (currentPath, sidebarConfig) => {
+  let prev = null;
+  let next = null;
+  let prevName = '';
+  let nextName = '';
 
-// Function to read the frontmatter of an MDX file and return its name and path
-function getPageData(filePath, parentDir = '') {
-  if (isDirectory(filePath)) return null; // Skip directories
-  const fileContent = readFileSync(filePath, 'utf8');
-  const { data } = matter(fileContent);
-  const fileName = basename(filePath, '.mdx');
-
-  // If the file is 'index.mdx', treat it as the root path or the parent directory path
-  const path = fileName === 'index' ? (parentDir || '/') : `/${parentDir}${fileName}`;
-  const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || 'Home' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-  // Return the page's path and name
-  return { path, name, relativePath: join(parentDir, fileName + '.mdx') };
-}
-
-// Determine the current file based on the URL path
-const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '') || '/';
-
-// Build the links structure from the config file
-const categories = sidebarConfig.order.map(category => {
-  const categoryItems = category.items.map(fileOrDir => {
-    if (typeof fileOrDir === 'object' && fileOrDir.redirect) {
-      // Handle redirect links
-      return {
-        name: fileOrDir.name,
-        redirect: fileOrDir.redirect
-      };
-    }
-
-    const fullPath = join(new URL('../pages', import.meta.url).pathname, fileOrDir);
-    if (isDirectory(fullPath)) {
-      const dirFiles = readdirSync(fullPath)
-        .filter(file => file.endsWith('.mdx') && file !== 'index.mdx') // Exclude 'index.mdx' from being listed as a separate file
-        .map(file => getPageData(join(fullPath, file), `${fileOrDir}/`))
-        .filter(Boolean); // Filter out null values
-
-      return {
-        name: getPageData(join(fullPath, 'index.mdx'), `${fileOrDir}/`)?.name || fileOrDir.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        path: `/${fileOrDir}/`,
-        isDirectory: true,
-        items: dirFiles,
-      };
-    } else {
-      return getPageData(fullPath);
-    }
-  }).filter(Boolean); // Filter out null values
-
-  return {
-    name: category.category,
-    items: categoryItems
-  };
-});
-
-// Function to determine the next and previous page names
-const findPrevNext = (currentPath, categories) => {
-  const flatPages = [];
-
-  // Traverse categories and items to create a flat list of pages
-  categories.forEach(category => {
-    category.items.forEach(item => {
-      if (item.isDirectory) {
-        item.items.forEach(subItem => {
-          flatPages.push(subItem);
-        });
-      } else {
-        flatPages.push(item);
+  // Flatten the sidebar items to a single array of paths and names
+  const pages = sidebarConfig.order.flatMap(category => 
+    category.items.map(item => {
+      if (typeof item === 'object' && item.redirect) {
+        return null; // Skip redirects in the prev/next logic
       }
-    });
-  });
+      const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
+      const name = typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name;
+      const fullPath = path === 'index' ? '/' : `/${path}`;
+      return { path: fullPath, name };
+    }).filter(Boolean) // Remove null values from redirects
+  );
 
-  // Find the index of the current page
-  const currentIndex = flatPages.findIndex(page => page.path === currentPath);
+  const currentIndex = pages.findIndex(page => page.path === currentPath);
 
-  // Determine previous and next pages
-  const prev = currentIndex > 0 ? flatPages[currentIndex - 1] : null;
-  const next = currentIndex < flatPages.length - 1 ? flatPages[currentIndex + 1] : null;
+  if (currentIndex > 0) {
+    prev = pages[currentIndex - 1].path;
+    prevName = pages[currentIndex - 1].name;
+  }
+  if (currentIndex < pages.length - 1) {
+    next = pages[currentIndex + 1].path;
+    nextName = pages[currentIndex + 1].name;
+  }
 
-  return { prev, next };
+  return { prev, next, prevName, nextName };
 };
 
-// Extract the previous and next pages based on the current path
-const { prev, next } = findPrevNext(currentPath, categories);
+const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 ---
 
 <!DOCTYPE html>
@@ -242,15 +187,15 @@ const { prev, next } = findPrevNext(currentPath, categories);
         <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
         <div class="nav-links">
           {prev ? (
-            <a href={prev.path}>
-              <i class="fas fa-arrow-left"></i><span>{prev.name}</span>
+            <a href={prev}>
+              <i class="fas fa-arrow-left"></i><span>{prevName}</span>
             </a>
           ) : (
             <span></span>
           )}
           {next ? (
-            <a href={next.path}>
-              <span>{next.name}</span><i class="fas fa-arrow-right"></i>
+            <a href={next}>
+              <span>{nextName}</span><i class="fas fa-arrow-right"></i>
             </a>
           ) : (
             <span></span>
