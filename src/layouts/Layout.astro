@@ -17,6 +17,28 @@ const components = {
   h1: H1,
   h2: H2,
   h3: H3,
+  pre: ({ children, ...props }) => {
+    const { children: codeChild } = children.props;
+    const codeProps = children.props;
+    const filename = codeProps.metastring ? codeProps.metastring.match(/name="(.+?)"/)?.[1] : null;
+    const language = codeProps.className.replace('language-', '');
+
+    return filename ? (
+      <div class="custom-code-block">
+        <div class="code-block-header">
+          <img src={`/images/logos/${language}.svg`} alt={`${language} logo`} class="code-block-logo" />
+          <span>{filename}</span>
+        </div>
+        <pre {...props} class={codeProps.className}>
+          {codeChild}
+        </pre>
+      </div>
+    ) : (
+      <pre {...props} class={codeProps.className}>
+        {codeChild}
+      </pre>
+    );
+  },
 };
 
 // Helper function to read the frontmatter from an MDX file
@@ -201,6 +223,34 @@ const breadcrumb = [
         color: inherit;
       }
 
+      /* Custom Code Block Styles */
+      .custom-code-block {
+        position: relative;
+        margin-bottom: 1.5rem;
+      }
+      .code-block-header {
+        position: absolute;
+        top: -1.25rem;
+        left: 1rem;
+        background-color: #f5f5f5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+      }
+      .code-block-logo {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+      }
+      pre {
+        background-color: #2d2d2d;
+        color: #fff;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        position: relative;
+      }
+
       /* Ensure the theme toggle is hidden on larger screens */
       #mobile-theme-toggle {
         display: none;
@@ -257,7 +307,6 @@ const breadcrumb = [
         </div>
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
-        <!-- Breadcrumb Navigation -->
         <nav class="breadcrumb">
           {breadcrumb.map((crumb, index) => (
             <span key={index}>
@@ -270,7 +319,7 @@ const breadcrumb = [
             </span>
           ))}
         </nav>
-        
+    
         <slot components={components} />
         <!-- Navigation Links at the Bottom -->
         <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
@@ -293,6 +342,7 @@ const breadcrumb = [
         </div>
       </main>
     </div>
+    
 
     <script src="/src/scripts/theme.js"></script>
     <script>
