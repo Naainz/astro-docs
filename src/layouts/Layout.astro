@@ -195,6 +195,12 @@ const breadcrumb = [
         color: #BBE1FA; /* Light blue for dark mode */
       }
 
+      .breadcrumb-arrow {
+        margin: 0 0.5rem;
+        font-size: 0.875rem;
+        color: inherit;
+      }
+
       /* Ensure the theme toggle is hidden on larger screens */
       #mobile-theme-toggle {
         display: none;
@@ -255,7 +261,7 @@ const breadcrumb = [
         <nav class="breadcrumb">
           {breadcrumb.map((crumb, index) => (
             <span key={index}>
-              {index > 0 && ' > '}
+              {index > 0 && <i class="fas fa-arrow-right breadcrumb-arrow"></i>}
               {crumb.path ? (
                 <a href={crumb.path}>{crumb.name}</a>
               ) : (
