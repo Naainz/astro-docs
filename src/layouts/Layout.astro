@@ -4,8 +4,8 @@ import "../styles/global.css";
 import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
-import { readFileSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { statSync, readdirSync } from 'fs';
+import { join } from 'path';
 import matter from 'gray-matter';
 
 const { title } = Astro.props;
@@ -19,18 +19,20 @@ const components = {
   h3: H3,
 };
 
-// Helper function to read the frontmatter from an MDX file
-function getFrontmatterName(filePath) {
+// Helper function to get the name of the current file or directory
+function getPageName(currentPath) {
+  const fileName = currentPath.split('/').pop().replace('.mdx', '');
+  return fileName ? fileName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Home';
+}
+
+// Helper function to determine if the current path is a directory
+function isDirectory(currentPath) {
+  const pagesDir = new URL('../pages', import.meta.url).pathname;
+  const itemPath = join(pagesDir, currentPath.replace(/^\//, ''));
   try {
-    if (statSync(filePath).isDirectory()) {
-      return ''; // Skip directories
-    }
-    const fileContent = readFileSync(filePath, 'utf8');
-    const { data } = matter(fileContent);
-    return data.path || '';
+    return statSync(itemPath).isDirectory();
   } catch (error) {
-    console.error(`Error reading frontmatter from ${filePath}:`, error);
-    return '';
+    return false;
   }
 }
 
@@ -40,6 +42,7 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   let next = null;
   let prevName = '';
   let nextName = '';
+  let isDownArrow = false;
 
   const pagesDir = new URL('../pages', import.meta.url).pathname;
 
@@ -81,16 +84,48 @@ const findPrevNext = (currentPath, sidebarConfig) => {
     prevName = pages[currentIndex - 1].name;
   }
 
-  // Remove directory navigation logic to make it non-functional
-  if (currentIndex < pages.length - 1 && !pages[currentIndex]?.isDirectory) {
+  // If the current page is an index file and there's a directory, move down into the directory
+  if (currentIndex < pages.length - 1 && pages[currentIndex] && pages[currentIndex].isDirectory) {
+    const currentDir = pages[currentIndex].path.replace('/', '');
+    const directoryPath = join(pagesDir, currentDir);
+
+    const filesInDir = readdirSync(directoryPath)
+      .filter(file => file.endsWith('.mdx') && file !== 'index.mdx')
+      .map(file => {
+        const filePath = join(directoryPath, file);
+        const fullPath = `${currentDir}/${file.replace('.mdx', '')}`;
+        return {
+          path: `/${fullPath}`,
+          name: getFrontmatterName(filePath) || file.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        };
+      });
+
+    if (filesInDir.length > 0) {
+      next = filesInDir[0].path;
+      nextName = filesInDir[0].name;
+      isDownArrow = true; // Indicates to use a down arrow
+    }
+  } else if (currentIndex < pages.length - 1) {
     next = pages[currentIndex + 1].path;
     nextName = pages[currentIndex + 1].name;
   }
 
-  return { prev, next, prevName, nextName };
+  return { prev, next, prevName, nextName, isDownArrow };
 };
 
-const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
+const { prev, next, prevName, nextName, isDownArrow } = findPrevNext(Astro.url.pathname, sidebarConfig);
+
+const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+const pageName = getPageName(currentPath);
+const dirName = currentPath.includes('/') ? currentPath.split('/')[0] : null;
+const isDir = isDirectory(currentPath);
+
+// Breadcrumb links
+const breadcrumb = [
+  { name: 'Documentation', path: '/' },
+  dirName && { name: dirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), path: `/${dirName}` },
+  { name: pageName }
+].filter(Boolean);
 ---
 
 <!DOCTYPE html>
@@ -166,6 +201,26 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, side
         margin: 0 0.5rem;
       }
 
+      /* Breadcrumb styles */
+      .breadcrumb {
+        font-size: 0.875rem;
+        color: #6B7280; /* Gray color */
+        margin-bottom: 1rem;
+      }
+      .breadcrumb a {
+        color: #004CA3;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+      .dark .breadcrumb {
+        color: #A3A3A3; /* Lighter gray for dark mode */
+      }
+      .dark .breadcrumb a {
+        color: #BBE1FA; /* Light blue for dark mode */
+      }
+
       /* Ensure the theme toggle is hidden on larger screens */
       #mobile-theme-toggle {
         display: none;
@@ -222,6 +277,20 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, side
         </div>
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+          {breadcrumb.map((crumb, index) => (
+            <span key={index}>
+              {index > 0 && ' > '}
+              {crumb.path ? (
+                <a href={crumb.path}>{crumb.name}</a>
+              ) : (
+                <span>{crumb.name}</span>
+              )}
+            </span>
+          ))}
+        </nav>
+        
         <slot components={components} />
         <!-- Navigation Links at the Bottom -->
         <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
@@ -236,7 +305,7 @@ const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, side
           {next ? (
             <a href={next}>
               <span>{nextName}</span>
-              <i class="fas fa-arrow-right"></i>
+              <i class={`fas fa-arrow-${isDownArrow ? 'down' : 'right'}`}></i>
             </a>
           ) : (
             <span></span>
