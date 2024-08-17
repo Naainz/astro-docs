@@ -18,9 +18,9 @@ function getPageData(filePath, parentDir = '') {
   const { data } = matter(fileContent);
   const fileName = basename(filePath, '.mdx');
 
-  // If the file is 'index.mdx', treat it as the root path or the parent directory path
-  const path = fileName === 'index' ? (parentDir || '/') : `/${parentDir}${fileName}`;
-  const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || 'Home' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  // If the file is 'index.mdx', treat it as the directory path
+  const path = fileName === 'index' ? `/${parentDir}` : `/${parentDir}${fileName}`;
+  const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || '' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   // Return the page's path and name
   return { path, name, relativePath: join(parentDir, fileName + '.mdx') };
@@ -42,14 +42,16 @@ const categories = sidebarConfig.order.map(category => {
 
     const fullPath = join(pagesDir, fileOrDir);
     if (isDirectory(fullPath)) {
+      const dirPath = `${fileOrDir}`; // Directory path
+      const indexFilePath = join(fullPath, 'index.mdx');
       const dirFiles = readdirSync(fullPath)
         .filter(file => file.endsWith('.mdx') && file !== 'index.mdx') // Exclude 'index.mdx' from being listed as a separate file
-        .map(file => getPageData(join(fullPath, file), `${fileOrDir}/`))
+        .map(file => getPageData(join(fullPath, file), `${dirPath}/`))
         .filter(Boolean); // Filter out null values
 
       return {
-        name: getPageData(join(fullPath, 'index.mdx'), `${fileOrDir}/`)?.name || fileOrDir.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        path: `/${fileOrDir}/`,
+        name: getPageData(indexFilePath, `${dirPath}/`)?.name || dirPath.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        path: `/${dirPath}`, // Correctly set the directory path without trailing slash
         isDirectory: true,
         items: dirFiles,
       };
