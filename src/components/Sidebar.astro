@@ -157,52 +157,43 @@ const categories = sidebarConfig.order.map(category => {
 
   <!-- New Text Links -->
   <div class="mt-6 space-y-3 flex-1 flex flex-col justify-end">
-    <a 
-      href="#" 
-      id="feedback-link"
-      class="block text-sm transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
+    <div 
+      onclick="handleFeedbackClick()"
+      class="block text-sm cursor-pointer transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
     >
       Questions? Give us feedback
       <i class="fas fa-arrow-right"></i>
-    </a>
-    <a 
-      href="#" 
-      id="edit-link"
-      class="block text-sm transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
+    </div>
+    <div 
+      onclick="handleEditClick()"
+      class="block text-sm cursor-pointer transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
     >
       Edit this page on GitHub
       <i class="fas fa-arrow-right"></i>
-    </a>
-    <a 
-      href="#"
+    </div>
+    <div 
       onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;" 
-      class="block text-sm transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
+      class="block text-sm cursor-pointer transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white flex justify-between items-center"
     >
       Scroll to top
       <i class="fas fa-arrow-up"></i>
-    </a>
+    </div>
   </div>
 </aside>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Function to generate and open the GitHub edit link
-    document.getElementById('edit-link').addEventListener('click', function(event) {
-      event.preventDefault();
-      const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-      const filePath = currentPath === '' ? 'index.mdx' : `${currentPath}.mdx`;
-      const githubBase = 'https://github.com/Naainz/astro-docs';
-      const editUrl = `${githubBase}/edit/main/src/pages/${filePath}`;
-      window.open(editUrl, '_blank');
-    });
+  window.handleFeedbackClick = function () {
+    const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+    const issueUrl = `https://github.com/Naainz/astro-docs/issues/new?title=Feedback%20for%20“${encodeURIComponent(currentPath || 'Home')}”`;
+    console.log('Opening GitHub issue page:', issueUrl);
+    window.open(issueUrl, '_blank');
+  };
 
-    // Function to generate and open the GitHub feedback issue link
-    document.getElementById('feedback-link').addEventListener('click', function(event) {
-      event.preventDefault();
-      const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-      const githubBase = 'https://github.com/Naainz/astro-docs';
-      const issueUrl = `${githubBase}/issues/new?title=Feedback%20for%20“${encodeURIComponent(currentPath || 'Home')}”`;
-      window.open(issueUrl, '_blank');
-    });
-  });
+  window.handleEditClick = function () {
+    const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+    const filePath = currentPath === '' ? 'index.mdx' : `${currentPath}.mdx`;
+    const editUrl = `https://github.com/Naainz/astro-docs/edit/main/src/pages/${filePath}`;
+    console.log('Opening GitHub edit page:', editUrl);
+    window.open(editUrl, '_blank');
+  };
 </script>
