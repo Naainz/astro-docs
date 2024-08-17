@@ -4,7 +4,7 @@ import "../styles/global.css";
 import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
-import { readFileSync, statSync, readdirSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import matter from 'gray-matter';
 
@@ -40,7 +40,6 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   let next = null;
   let prevName = '';
   let nextName = '';
-  let isDownArrow = false;
 
   const pagesDir = new URL('../pages', import.meta.url).pathname;
 
@@ -71,7 +70,7 @@ const findPrevNext = (currentPath, sidebarConfig) => {
         return null;
       }
 
-      return { path: fullPath, name, isDirectory, originalPath: item };
+      return { path: fullPath, name, isDirectory };
     }).filter(Boolean) // Remove null values from redirects and errors
   );
 
@@ -82,36 +81,16 @@ const findPrevNext = (currentPath, sidebarConfig) => {
     prevName = pages[currentIndex - 1].name;
   }
 
-  // If the current page is an index file and there's a directory, move down into the directory
-  if (currentIndex < pages.length - 1 && pages[currentIndex] && pages[currentIndex].isDirectory) {
-    const currentDir = pages[currentIndex].originalPath.replace('.mdx', '');
-    const directoryPath = join(pagesDir, currentDir);
-
-    const filesInDir = readdirSync(directoryPath)
-      .filter(file => file.endsWith('.mdx') && file !== 'index.mdx')
-      .map(file => {
-        const filePath = join(directoryPath, file);
-        const fullPath = `${currentDir}/${file.replace('.mdx', '')}`;
-        return {
-          path: fullPath,
-          name: getFrontmatterName(filePath) || file.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        };
-      });
-
-    if (filesInDir.length > 0) {
-      next = `/${filesInDir[0].path}`;
-      nextName = filesInDir[0].name;
-      isDownArrow = true; // Indicates to use a down arrow
-    }
-  } else if (currentIndex < pages.length - 1) {
+  // Remove directory navigation logic to make it non-functional
+  if (currentIndex < pages.length - 1 && !pages[currentIndex]?.isDirectory) {
     next = pages[currentIndex + 1].path;
     nextName = pages[currentIndex + 1].name;
   }
 
-  return { prev, next, prevName, nextName, isDownArrow };
+  return { prev, next, prevName, nextName };
 };
 
-const { prev, next, prevName, nextName, isDownArrow } = findPrevNext(Astro.url.pathname, sidebarConfig);
+const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 ---
 
 <!DOCTYPE html>
@@ -257,7 +236,7 @@ const { prev, next, prevName, nextName, isDownArrow } = findPrevNext(Astro.url.p
           {next ? (
             <a href={next}>
               <span>{nextName}</span>
-              <i class={`fas fa-arrow-${isDownArrow ? 'down' : 'right'}`}></i>
+              <i class="fas fa-arrow-right"></i>
             </a>
           ) : (
             <span></span>
