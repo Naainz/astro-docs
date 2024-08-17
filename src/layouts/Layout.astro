@@ -20,7 +20,7 @@ const components = {
   pre: ({ children, ...props }) => {
     const codeProps = children.props;
     const metastring = codeProps.metastring || '';
-    const filename = metastring.match(/name="(.+?)"/)?.[1];
+    const filename = metastring.match(/name="(.+?)"/)?.[1]; // Extract filename from metastring
 
     return filename
       ? Astro.html`<div style="margin-bottom: 1rem;">
@@ -223,17 +223,6 @@ const breadcrumb = [
         margin: 0 0.5rem;
         font-size: 0.875rem;
         color: inherit;
-      }
-
-      .custom-code-block {
-        position: relative;
-        margin-bottom: 1.5rem;
-      }
-      .code-block-filename {
-        font-size: 0.875rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        color: #333;
       }
 
       pre {
