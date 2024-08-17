@@ -21,12 +21,10 @@ const components = {
     const { children: codeChild } = children.props;
     const codeProps = children.props;
     const filename = codeProps.metastring ? codeProps.metastring.match(/name="(.+?)"/)?.[1] : null;
-    const language = codeProps.className.replace('language-', '');
 
     return filename
       ? Astro.html`<div class="custom-code-block">
           <div class="code-block-header">
-            <img src="/images/logos/${language}.svg" alt="${language} logo" class="code-block-logo" />
             <span>${filename}</span>
           </div>
           <pre class="${codeProps.className}" {...props}>${codeChild}</pre>
@@ -243,11 +241,7 @@ const breadcrumb = [
         display: flex;
         align-items: center;
       }
-      .code-block-logo {
-        width: 1rem;
-        height: 1rem;
-        margin-right: 0.5rem;
-      }
+
       pre {
         background-color: #2d2d2d;
         color: #fff;
