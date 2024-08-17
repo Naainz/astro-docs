@@ -5,7 +5,7 @@ import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
 import { readFileSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import matter from 'gray-matter';
 
 const { title } = Astro.props;
@@ -23,21 +23,15 @@ const components = {
     const filename = codeProps.metastring ? codeProps.metastring.match(/name="(.+?)"/)?.[1] : null;
     const language = codeProps.className.replace('language-', '');
 
-    return filename ? (
-      <div class="custom-code-block">
-        <div class="code-block-header">
-          <img src={`/images/logos/${language}.svg`} alt={`${language} logo`} class="code-block-logo" />
-          <span>{filename}</span>
-        </div>
-        <pre {...props} class={codeProps.className}>
-          {codeChild}
-        </pre>
-      </div>
-    ) : (
-      <pre {...props} class={codeProps.className}>
-        {codeChild}
-      </pre>
-    );
+    return filename
+      ? Astro.html`<div class="custom-code-block">
+          <div class="code-block-header">
+            <img src="/images/logos/${language}.svg" alt="${language} logo" class="code-block-logo" />
+            <span>${filename}</span>
+          </div>
+          <pre class="${codeProps.className}" {...props}>${codeChild}</pre>
+        </div>`
+      : Astro.html`<pre class="${codeProps.className}" {...props}>${codeChild}</pre>`;
   },
 };
 
@@ -66,44 +60,54 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   const pagesDir = new URL('../pages', import.meta.url).pathname;
 
   // Flatten the sidebar items to a single array of paths and names
-  const pages = sidebarConfig.order.flatMap(category => 
-    category.items.map(item => {
-      if (!item) return null; // Ensure the item exists
-      if (typeof item === 'object' && item.redirect) {
-        return null; // Skip redirects in the prev/next logic
-      }
-
-      const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
-      const fullPath = path === 'index' ? '/' : `/${path}`;
-      const itemPath = join(pagesDir, item);
-
-      let name;
-      let isDirectory = false;
-
-      try {
-        isDirectory = statSync(itemPath).isDirectory();
-        if (typeof item === 'string') {
-          name = getFrontmatterName(itemPath) || item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        } else {
-          name = item.name;
+  const pages = sidebarConfig.order.flatMap((category) =>
+    category.items
+      .map((item) => {
+        if (!item) return null;
+        if (typeof item === 'object' && item.redirect) {
+          return null; // Skip redirects in the prev/next logic
         }
-      } catch (error) {
-        console.error(`Error processing item: ${item}`, error);
-        return null;
-      }
 
-      return { path: fullPath, name, isDirectory };
-    }).filter(Boolean) // Remove null values from redirects and errors
+        const path =
+          typeof item === 'string'
+            ? item.replace('.mdx', '')
+            : item.path.replace('.mdx', '');
+        const fullPath = path === 'index' ? '/' : `/${path}`;
+        const itemPath = join(pagesDir, item);
+
+        let name;
+        let isDirectory = false;
+
+        try {
+          isDirectory = statSync(itemPath).isDirectory();
+          if (typeof item === 'string') {
+            name =
+              getFrontmatterName(itemPath) ||
+              item
+                .replace('.mdx', '')
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (l) => l.toUpperCase());
+          } else {
+            name = item.name;
+          }
+        } catch (error) {
+          console.error(`Error processing item: ${item}`, error);
+          return null;
+        }
+
+        return { path: fullPath, name, isDirectory };
+      })
+      .filter(Boolean)
   );
 
-  const currentIndex = pages.findIndex(page => page.path === currentPath);
+  const currentIndex = pages.findIndex((page) => page.path === currentPath);
 
   if (currentIndex > 0) {
     prev = pages[currentIndex - 1].path;
     prevName = pages[currentIndex - 1].name;
   }
 
-  // Remove directory navigation logic to make it non-functional
   if (currentIndex < pages.length - 1 && !pages[currentIndex]?.isDirectory) {
     next = pages[currentIndex + 1].path;
     nextName = pages[currentIndex + 1].name;
@@ -115,12 +119,20 @@ const findPrevNext = (currentPath, sidebarConfig) => {
 const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 
 const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
-const pageName = currentPath.split('/').pop().replace('.mdx', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+const pageName = currentPath
+  .split('/')
+  .pop()
+  .replace('.mdx', '')
+  .replace(/-/g, ' ')
+  .replace(/\b\w/g, (l) => l.toUpperCase());
 const dirName = currentPath.includes('/') ? currentPath.split('/')[0] : null;
 const breadcrumb = [
   { name: 'Documentation', path: '/' },
-  dirName && { name: dirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), path: `/${dirName}` },
-  { name: pageName }
+  dirName && {
+    name: dirName.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+    path: `/${dirName}`,
+  },
+  { name: pageName },
 ].filter(Boolean);
 ---
 
@@ -146,7 +158,6 @@ const breadcrumb = [
         transform: translateY(-8px) rotate(-45deg);
       }
 
-      /* Ensure GitHub icon and text adapt to dark mode */
       .github-icon {
         filter: invert(0); /* Default (light mode) */
         transition: filter 0.3s ease;
@@ -161,18 +172,14 @@ const breadcrumb = [
       .dark .navbar-text {
         color: white; /* Text color in dark mode */
       }
-      /* Dark mode text for the main content */
       .dark .prose {
         color: white; /* Text color for MDX content in dark mode */
       }
-
-      /* Dark mode background for the dropdown menu */
       .dark .dropdown-menu {
         background-color: #1f2937; /* Dark mode background */
         color: white; /* Dark mode text color */
       }
 
-      /* Styles for the navigation arrows at the bottom */
       .nav-links {
         display: flex;
         justify-content: space-between;
@@ -197,7 +204,6 @@ const breadcrumb = [
         margin: 0 0.5rem;
       }
 
-      /* Breadcrumb styles */
       .breadcrumb {
         font-size: 0.875rem;
         color: #6B7280; /* Gray color */
@@ -223,7 +229,6 @@ const breadcrumb = [
         color: inherit;
       }
 
-      /* Custom Code Block Styles */
       .custom-code-block {
         position: relative;
         margin-bottom: 1.5rem;
@@ -251,12 +256,10 @@ const breadcrumb = [
         position: relative;
       }
 
-      /* Ensure the theme toggle is hidden on larger screens */
       #mobile-theme-toggle {
         display: none;
       }
 
-      /* Show the theme toggle in the dropdown on smaller screens */
       @media (max-width: 767px) {
         #theme-toggle {
           display: none; /* Hide the desktop toggle */
@@ -321,7 +324,6 @@ const breadcrumb = [
         </nav>
     
         <slot components={components} />
-        <!-- Navigation Links at the Bottom -->
         <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
         <div class="nav-links">
           {prev ? (
@@ -343,7 +345,6 @@ const breadcrumb = [
       </main>
     </div>
     
-
     <script src="/src/scripts/theme.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
@@ -388,14 +389,26 @@ const breadcrumb = [
         const updateActiveLink = () => {
           const currentPath = window.location.pathname;
           const links = document.querySelectorAll('#sidebar-content a');
-          links.forEach(link => {
+          links.forEach((link) => {
             const isActive = link.getAttribute('href') === currentPath;
             if (isActive) {
               link.classList.add('bg-[#E0EFFF]', 'text-[#004CA3]');
-              link.classList.remove('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+              link.classList.remove(
+                'text-[#6B7280]',
+                'dark:text-[#A3A3A3]',
+                'hover:opacity-100',
+                'hover:bg-gray-200',
+                'dark:hover:bg-gray-800'
+              );
             } else {
               link.classList.remove('bg-[#E0EFFF]', 'text-[#004CA3]');
-              link.classList.add('text-[#6B7280]', 'dark:text-[#A3A3A3]', 'hover:opacity-100', 'hover:bg-gray-200', 'dark:hover:bg-gray-800');
+              link.classList.add(
+                'text-[#6B7280]',
+                'dark:text-[#A3A3A3]',
+                'hover:opacity-100',
+                'hover:bg-gray-200',
+                'dark:hover:bg-gray-800'
+              );
             }
           });
         };
@@ -407,10 +420,9 @@ const breadcrumb = [
           const decodedPath = decodeURIComponent(path);
 
           if (isDirectory) {
-            toggleFolder(decodedPath);  // Toggle the folder dropdown if it's a directory
-            history.pushState({}, '', decodedPath);  // Update URL without reloading
+            toggleFolder(decodedPath);
+            history.pushState({}, '', decodedPath);
 
-            // Fetch and load the directory's index content
             try {
               const indexPath = `${decodedPath}`;
               const response = await fetch(indexPath);
@@ -423,15 +435,14 @@ const breadcrumb = [
               const newContent = doc.querySelector('#content');
               if (newContent) {
                 document.querySelector('#content').innerHTML = newContent.innerHTML;
-                updateActiveLink();  // Update the active link after content is loaded
+                updateActiveLink();
               } else {
-                console.error("Content not found in the response HTML.");
+                console.error('Content not found in the response HTML.');
               }
             } catch (error) {
               console.error(error);
             }
           } else {
-            // Handle regular file loading
             try {
               const response = await fetch(decodedPath);
               if (!response.ok) {
@@ -443,10 +454,10 @@ const breadcrumb = [
               const newContent = doc.querySelector('#content');
               if (newContent) {
                 document.querySelector('#content').innerHTML = newContent.innerHTML;
-                history.pushState({}, '', decodedPath);  // Update the history with the decoded path
-                updateActiveLink();  // Update the active link after content is loaded
+                history.pushState({}, '', decodedPath);
+                updateActiveLink();
               } else {
-                console.error("Content not found in the response HTML.");
+                console.error('Content not found in the response HTML.');
               }
             } catch (error) {
               console.error(error);
@@ -457,8 +468,10 @@ const breadcrumb = [
         window.navigateAndToggle = navigateAndToggle;
 
         const links = document.querySelectorAll('a[href^="/"]');
-        links.forEach(link => {
-          link.addEventListener('click', (e) => navigateAndToggle(e, link.getAttribute('href')));
+        links.forEach((link) => {
+          link.addEventListener('click', (e) =>
+            navigateAndToggle(e, link.getAttribute('href'))
+          );
         });
 
         window.addEventListener('popstate', async () => {
@@ -473,9 +486,9 @@ const breadcrumb = [
             const newContent = doc.querySelector('#content');
             if (newContent) {
               document.querySelector('#content').innerHTML = newContent.innerHTML;
-              updateActiveLink();  // Update the active link when navigating via history
+              updateActiveLink();
             } else {
-              console.error("Content not found in the response HTML.");
+              console.error('Content not found in the response HTML.');
             }
           } catch (error) {
             console.error(error);
