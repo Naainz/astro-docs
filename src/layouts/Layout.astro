@@ -31,18 +31,19 @@ const findPrevNext = (currentPath, sidebarConfig) => {
       }
       const path = typeof item === 'string' ? item.replace('.mdx', '') : item.path.replace('.mdx', '');
       const name = typeof item === 'string' ? item.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : item.name;
-      return { path, name };
+      const fullPath = path === 'index' ? '/' : `/${path}`;
+      return { path: fullPath, name };
     }).filter(Boolean) // Remove null values from redirects
   );
 
-  const currentIndex = pages.findIndex(page => `/${page.path}` === currentPath);
+  const currentIndex = pages.findIndex(page => page.path === currentPath);
 
   if (currentIndex > 0) {
-    prev = `/${pages[currentIndex - 1].path}`;
+    prev = pages[currentIndex - 1].path;
     prevName = pages[currentIndex - 1].name;
   }
   if (currentIndex < pages.length - 1) {
-    next = `/${pages[currentIndex + 1].path}`;
+    next = pages[currentIndex + 1].path;
     nextName = pages[currentIndex + 1].name;
   }
 
