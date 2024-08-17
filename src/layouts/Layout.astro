@@ -16,20 +16,43 @@ const components = {
   h3: H3,
 };
 
+// Build the links structure from the sidebar configuration
+const buildPageList = (sidebarConfig) => {
+  const pages = [];
+
+  const traverseItems = (items, parentPath = '') => {
+    items.forEach((item) => {
+      let path = '';
+      if (typeof item === 'string') {
+        path = item.replace('.mdx', '');
+      } else if (item.path) {
+        path = item.path.replace('.mdx', '');
+      }
+
+      const fullPath = path === 'index' ? '/' : `/${parentPath}${path}`;
+      const itemName = item.name || (typeof path === 'string' ? path.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '');
+
+      pages.push({ path: fullPath, name: itemName });
+
+      if (item.items) {
+        traverseItems(item.items, `${path}/`);
+      }
+    });
+  };
+
+  sidebarConfig.order.forEach((category) => {
+    traverseItems(category.items);
+  });
+
+  return pages;
+};
+
 // Function to determine the previous and next pages and their names
-const findPrevNext = (currentPath, categories = []) => {
+const findPrevNext = (currentPath, pages) => {
   let prev = null;
   let next = null;
   let prevName = '';
   let nextName = '';
-
-  // Ensure categories is an array and not undefined
-  const pages = categories.flatMap(category =>
-    category.items?.map(item => ({
-      path: item.path,
-      name: item.name,
-    })) || [] // Handle cases where category.items might be undefined
-  );
 
   const currentIndex = pages.findIndex(page => page.path === currentPath);
 
@@ -45,23 +68,11 @@ const findPrevNext = (currentPath, categories = []) => {
   return { prev, next, prevName, nextName };
 };
 
-// Get the categories and items from the sidebar configuration
-const categories = sidebarConfig.order?.map(category => {
-  return {
-    name: category.category,
-    items: category.items.map(fileOrDir => {
-      if (typeof fileOrDir === 'object' && fileOrDir.redirect) {
-        return null; // Skip redirects
-      }
-      const path = fileOrDir.replace('.mdx', '') === 'index' ? '/' : `/${fileOrDir.replace('.mdx', '')}`;
-      const name = fileOrDir.replace('.mdx', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      return { path, name };
-    }).filter(Boolean) // Remove null values from redirects
-  };
-}).filter(Boolean) || [];  // Handle case where categories might be undefined
+// Build the list of pages from the sidebar configuration
+const pages = buildPageList(sidebarConfig);
 
-// Find the previous and next pages based on the current path and sidebar configuration
-const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, categories);
+// Find the previous and next pages based on the current path
+const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, pages);
 ---
 
 <!DOCTYPE html>
