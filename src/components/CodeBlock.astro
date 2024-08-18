@@ -1,16 +1,36 @@
 ---
-const { children, ...props } = Astro.props;
-const codeString = children.trim();
+// components/CodeBlock.astro
+
+const { children, className = '' } = Astro.props;
+
+// Extract the code content as a string
+let codeString = typeof children === 'string' ? children : children.props?.children || '';
+
 const codeLines = codeString.split('\n');
-const filename = codeLines.shift().trim(); // Extract the first line as the filename
-const codeContent = codeLines.join('\n'); // Join the remaining lines as the code content
+
+// If the first line looks like a filename, treat it as such
+let filename = '';
+let codeContent = '';
+
+if (codeLines.length > 1 && codeLines[0].trim().endsWith('.js')) {
+  filename = codeLines.shift().trim(); // Extract the first line as the filename
+  codeContent = codeLines.join('\n'); // Join the remaining lines as the code content
+} else {
+  // If no filename, treat the entire content as code
+  codeContent = codeString;
+}
+
+// Append some extra characters to the code content for testing
+codeContent += "\n\n// Extra characters added by CodeBlock component.";
 ---
 
 <div style="margin-bottom: 1rem;">
-  <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">
-    {filename}
+  {filename && (
+    <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">
+      {filename}
+    </div>
+  )}
+  <div class={`custom-code-block ${className}`} style="background-color: #2d2d2d; color: #fff; padding: 1rem; border-radius: 0.5rem; overflow-x: auto;">
+    <code>{codeContent}</code>
   </div>
-  <pre {...props} style="background-color: #2d2d2d; color: #fff; padding: 1rem; border-radius: 0.5rem;">
-    {codeContent}
-  </pre>
 </div>
