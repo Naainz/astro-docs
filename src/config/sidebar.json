@@ -15,6 +15,10 @@
     {
       "category": "Markdown Formatting",
       "items": [
+        {
+          "name": "MDX Documentation",
+          "redirect": "https://mdxjs.com/docs"
+        },
         "creating.mdx",
         "info.mdx"
       ]
