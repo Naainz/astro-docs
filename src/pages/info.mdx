@@ -8,6 +8,8 @@ import Codeblock from '@components/Codeblock.astro';
 
 # Demo Page
 
-<Codeblock language="javascript">
+<Codeblock language="javascript" code={`
 console.log("Hello, world!");
-</Codeblock>
+console.log("This is a multi-line code block.");
+console.log("It should preserve the formatting.");
+`} />
