@@ -8,7 +8,7 @@
       "items": ["theme.mdx", "sidebar.mdx", "github.mdx"]
     },
     {
-      "category": "More",
+      "category": "Markdown Formatting",
       "items": [
         "info.mdx",
         "more",
