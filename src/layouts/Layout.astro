@@ -4,6 +4,7 @@ import "../styles/global.css";
 import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
+import CodeBlock from '../components/CodeBlock.astro';
 import { readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
@@ -17,22 +18,7 @@ const components = {
   h1: H1,
   h2: H2,
   h3: H3,
-  pre: ({ children, ...props }) => {
-    const codeProps = children.props;
-    const codeString = codeProps.children || '';
-    const codeLines = codeString.trim().split('\n');
-    const filename = codeLines.shift().trim(); // Extract the first line as filename
-    const codeContent = codeLines.join('\n'); // Join the remaining lines as code content
-
-    return Astro.html`
-      <div style="margin-bottom: 1rem;">
-        <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">${filename}</div>
-        <pre ${props} class="${codeProps.className}">
-          ${codeContent}
-        </pre>
-      </div>
-    `;
-  },
+  pre: CodeBlock,
 };
 
 // Helper function to read the frontmatter from an MDX file

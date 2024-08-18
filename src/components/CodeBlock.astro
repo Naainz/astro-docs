@@ -1,0 +1,16 @@
+---
+const { children, ...props } = Astro.props;
+const codeString = children.trim();
+const codeLines = codeString.split('\n');
+const filename = codeLines.shift().trim(); // Extract the first line as the filename
+const codeContent = codeLines.join('\n'); // Join the remaining lines as the code content
+---
+
+<div style="margin-bottom: 1rem;">
+  <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">
+    {filename}
+  </div>
+  <pre {...props} style="background-color: #2d2d2d; color: #fff; padding: 1rem; border-radius: 0.5rem;">
+    {codeContent}
+  </pre>
+</div>
