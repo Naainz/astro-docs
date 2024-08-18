@@ -5,7 +5,7 @@
     },
     {
       "category": "Customization",
-      "items": ["theme.mdx"]
+      "items": ["theme.mdx", "sidebar.mdx"]
     },
     {
       "category": "More",
