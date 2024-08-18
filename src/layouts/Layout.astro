@@ -4,7 +4,6 @@ import "../styles/global.css";
 import H1 from '../components/H1.astro';
 import H2 from '../components/H2.astro';
 import H3 from '../components/H3.astro';
-import Codeblock from '@components/Codeblock.astro';
 import { readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
@@ -18,8 +17,6 @@ const components = {
   h1: H1,
   h2: H2,
   h3: H3,
-  pre: Codeblock,
-  code: Codeblock,
 };
 
 // Helper function to read the frontmatter from an MDX file

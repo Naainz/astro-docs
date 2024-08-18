@@ -4,12 +4,8 @@ title: 'Demo'
 path: 'CUSTOM_PATH'
 ---
 
-import Codeblock from '@components/Codeblock.astro';
-
 # Demo Page
 
-<Codeblock language="javascript" code={`
-console.log("Hello, world!");
-console.log("This is a multi-line code block.");
-console.log("It should preserve the formatting.");
-`} />
+```js name="example.js"
+console.log('This is an example codeblock');
+```
