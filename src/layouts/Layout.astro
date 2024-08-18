@@ -100,9 +100,35 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   return { prev, next, prevName, nextName };
 };
 
+// Get the current page's path
+const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+
+// Function to calculate reading time based on word count
+function calculateReadingTime(content) {
+  const wordsPerMinute = 200; // Average reading speed
+  const wordCount = content.split(/\s+/).length;
+  const readingTimeMinutes = Math.ceil(wordCount / wordsPerMinute);
+  return readingTimeMinutes;
+}
+
+// Function to get the markdown content and calculate its reading time
+function getMarkdownContentAndReadingTime(filePath) {
+  try {
+    const fileContent = readFileSync(filePath, 'utf8');
+    const readingTime = calculateReadingTime(fileContent);
+    return readingTime;
+  } catch (error) {
+    console.error(`Error reading markdown content from ${filePath}:`, error);
+    return null;
+  }
+}
+
+// Get the current page's markdown file path and calculate the reading time
+const filePath = join(new URL('../pages', import.meta.url).pathname, `${currentPath}.mdx`);
+const readingTime = getMarkdownContentAndReadingTime(filePath);
+
 const { prev, next, prevName, nextName } = findPrevNext(Astro.url.pathname, sidebarConfig);
 
-const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
 const pageName = currentPath
   .split('/')
   .pop()
@@ -192,6 +218,9 @@ const breadcrumb = [
         font-size: 0.875rem;
         color: #6B7280; /* Gray color */
         margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
       .breadcrumb a {
         color: #004CA3;
@@ -211,6 +240,11 @@ const breadcrumb = [
         margin: 0 0.5rem;
         font-size: 0.875rem;
         color: inherit;
+      }
+
+      .reading-time {
+        opacity: 0.85;
+        color: black;
       }
 
       pre {
@@ -276,16 +310,21 @@ const breadcrumb = [
       </aside>
       <main id="content" class="flex-1 md:ml-6 prose dark:prose-invert max-w-none">
         <nav class="breadcrumb">
-          {breadcrumb.map((crumb, index) => (
-            <span key={index}>
-              {index > 0 && <i class="fas fa-arrow-right breadcrumb-arrow"></i>}
-              {crumb.path ? (
-                <a href={crumb.path}>{crumb.name}</a>
-              ) : (
-                <span>{crumb.name}</span>
-              )}
-            </span>
-          ))}
+          <div>
+            {breadcrumb.map((crumb, index) => (
+              <span key={index}>
+                {index > 0 && <i class="fas fa-arrow-right breadcrumb-arrow"></i>}
+                {crumb.path ? (
+                  <a href={crumb.path}>{crumb.name}</a>
+                ) : (
+                  <span>{crumb.name}</span>
+                )}
+              </span>
+            ))}
+          </div>
+          <div class="reading-time">
+            {readingTime} minute{readingTime > 1 ? 's' : ''}
+          </div>
         </nav>
     
         <slot components={components} />
