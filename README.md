@@ -12,7 +12,6 @@ This documentation template is built using the following technologies:
 - [Astro.js](https://astro.build/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [MDX](https://mdxjs.com/)
-- [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
 ## Features
 
