@@ -13,3 +13,9 @@ body {
 body.dark {
   @apply bg-gray-900 text-gray-100;
 }
+.sticky-sidebar {
+  position:sticky;
+  top:4rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}

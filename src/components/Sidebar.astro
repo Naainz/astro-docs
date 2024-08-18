@@ -67,7 +67,7 @@ const categories = sidebarConfig.order.map(category => {
 });
 ---
 
-<aside class="w-56 px-3 py-2 flex flex-col h-full">
+<aside class="w-56 px-3 py-2 flex flex-col h-full fixed-sidebar">
   <nav class="flex-1">
     {categories.map((category, index) => (
       <div class={`space-y-2 ${index !== 0 ? 'mt-10' : ''}`} key={index}>
