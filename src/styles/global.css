@@ -15,15 +15,15 @@ body.dark {
 }
 
 .custom-code-block {
-  font-family: monospace;
-  white-space: pre;
   background-color: #2d2d2d;
   color: #fff;
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
+  font-family: monospace;
 }
 
 .custom-code-block code {
   display: block;
+  white-space: pre-wrap;
 }
