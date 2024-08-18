@@ -15,7 +15,8 @@
     {
       "category": "Markdown Formatting",
       "items": [
-        "info.mdx"
+        "info.mdx",
+        "creating.mdx"
       ]
     },
     {
