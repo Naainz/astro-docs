@@ -19,15 +19,19 @@ const components = {
   h3: H3,
   pre: ({ children, ...props }) => {
     const codeProps = children.props;
-    const metastring = codeProps.metastring || '';
-    const filename = metastring.match(/name="(.+?)"/)?.[1]; // Extract filename from metastring
+    const codeString = codeProps.children || '';
+    const codeLines = codeString.trim().split('\n');
+    const filename = codeLines.shift().trim(); // Extract the first line as filename
+    const codeContent = codeLines.join('\n'); // Join the remaining lines as code content
 
-    return filename
-      ? Astro.html`<div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">${filename}</div>
-          <pre ${props} class="${codeProps.className}">${codeProps.children}</pre>
-        </div>`
-      : Astro.html`<pre ${props} class="${codeProps.className}">${codeProps.children}</pre>`;
+    return Astro.html`
+      <div style="margin-bottom: 1rem;">
+        <div style="font-size: 0.875rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">${filename}</div>
+        <pre ${props} class="${codeProps.className}">
+          ${codeContent}
+        </pre>
+      </div>
+    `;
   },
 };
 
