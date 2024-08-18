@@ -21,7 +21,7 @@ const components = {
 function getFrontmatterName(filePath) {
   try {
     if (statSync(filePath).isDirectory()) {
-      return ''; 
+      return '';
     }
     const fileContent = readFileSync(filePath, 'utf8');
     const { data } = matter(fileContent);
@@ -45,7 +45,7 @@ const findPrevNext = (currentPath, sidebarConfig) => {
       .map((item) => {
         if (!item) return null;
         if (typeof item === 'object' && item.redirect) {
-          return null; 
+          return null;
         }
 
         const path =
@@ -99,7 +99,7 @@ const findPrevNext = (currentPath, sidebarConfig) => {
 const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
 
 function calculateReadingTime(content) {
-  const wordsPerMinute = 200;
+  const wordsPerMinute = 200; 
   const wordCount = content.split(/\s+/).length;
   const readingTimeMinutes = Math.ceil(wordCount / wordsPerMinute);
   return readingTimeMinutes;
@@ -161,25 +161,25 @@ const breadcrumb = [
       }
 
       .github-icon {
-        filter: invert(0); /* Default (light mode) */
+        filter: invert(0);
         transition: filter 0.3s ease;
       }
       .dark .github-icon {
-        filter: invert(1); /* Invert the color for dark mode */
+        filter: invert(1);
       }
       .navbar-text {
-        color: #333; /* Default text color for light mode */
+        color: #333; 
         transition: color 0.3s ease;
       }
       .dark .navbar-text {
-        color: white; /* Text color in dark mode */
+        color: white; 
       }
       .dark .prose {
-        color: white; /* Text color for MDX content in dark mode */
+        color: white;
       }
       .dark .dropdown-menu {
-        background-color: #1f2937; /* Dark mode background */
-        color: white; /* Dark mode text color */
+        background-color: #1f2937;
+        color: white;
       }
 
       .nav-links {
@@ -208,7 +208,7 @@ const breadcrumb = [
 
       .breadcrumb {
         font-size: 0.875rem;
-        color: #6B7280; /* Gray color */
+        color: #6B7280;
         margin-bottom: 1rem;
         display: flex;
         justify-content: space-between;
@@ -222,10 +222,10 @@ const breadcrumb = [
         text-decoration: underline;
       }
       .dark .breadcrumb {
-        color: #A3A3A3; /* Lighter gray for dark mode */
+        color: #A3A3A3;
       }
       .dark .breadcrumb a {
-        color: #BBE1FA; /* Light blue for dark mode */
+        color: #BBE1FA;
       }
 
       .breadcrumb-arrow {
@@ -237,6 +237,9 @@ const breadcrumb = [
       .reading-time {
         opacity: 0.85;
         color: black;
+      }
+      .dark .reading-time {
+        color: white;
       }
 
       pre {
@@ -253,10 +256,10 @@ const breadcrumb = [
 
       @media (max-width: 767px) {
         #theme-toggle {
-          display: none; /* Hide the desktop toggle */
+          display: none; 
         }
         #mobile-theme-toggle {
-          display: block; /* Show the mobile toggle */
+          display: block;
         }
       }
     </style>
