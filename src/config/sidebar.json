@@ -1,7 +1,12 @@
 {
   "order": [
     {
-      "items": ["index.mdx", "started.mdx"]
+      "items": ["index.mdx", "started.mdx",
+      {
+        "name": "Author",
+        "redirect": "https://www.naai.nz"
+      }
+    ]
     },
     {
       "category": "Customization",
@@ -10,13 +15,12 @@
     {
       "category": "Markdown Formatting",
       "items": [
-        "info.mdx",
-        "more",
-        {
-          "name": "Author",
-          "redirect": "https://www.naai.nz"
-        }
+        "info.mdx"
       ]
+    },
+    {
+      "category": "Directories",
+      "items": ["more"]
     }
   ]
 }
