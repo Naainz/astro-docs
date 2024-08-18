@@ -6,6 +6,7 @@ import vercel from '@astrojs/vercel/serverless';
 export default defineConfig({
   integrations: [tailwind(), mdx()],
   adapter: vercel(),
+  output: 'server',
   vite: {
     resolve: {
       alias: {
