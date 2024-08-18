@@ -1,16 +1,15 @@
 ---
 // components/Codeblock.astro
 
-const { children, className = '' } = Astro.props || {};  // Ensure Astro.props is defined
+const { children, className = '', language = 'javascript' } = Astro.props;
 
-// Safely handle children
-let codeString = typeof children === 'string' ? children : children?.props?.children || '';
-
-// For testing purposes, append a string
-codeString += "\n\n// Appended by Codeblock.astro";
+// Simply convert children to a string
+let codeString = typeof children === 'string' ? children : '';
 
 ---
 
-<pre class={className} style="background-color: #2d2d2d; color: #fff; padding: 1rem; border-radius: 0.5rem;">
-  <code>{codeString}</code>
+<pre class={`language-${language} ${className}`} style="background-color: #2d2d2d; color: #fff; padding: 1rem; border-radius: 0.5rem;">
+  <code class={`language-${language}`}>
+    {codeString || 'No code found'}
+  </code>
 </pre>
