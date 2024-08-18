@@ -10,7 +10,6 @@ import matter from 'gray-matter';
 
 const { title } = Astro.props;
 
-// Import and parse the sidebar configuration
 import sidebarConfig from '../config/sidebar.json';
 
 const components = {
@@ -19,11 +18,10 @@ const components = {
   h3: H3,
 };
 
-// Helper function to read the frontmatter from an MDX file
 function getFrontmatterName(filePath) {
   try {
     if (statSync(filePath).isDirectory()) {
-      return ''; // Skip directories
+      return ''; 
     }
     const fileContent = readFileSync(filePath, 'utf8');
     const { data } = matter(fileContent);
@@ -34,7 +32,6 @@ function getFrontmatterName(filePath) {
   }
 }
 
-// Function to determine the previous and next pages and their names
 const findPrevNext = (currentPath, sidebarConfig) => {
   let prev = null;
   let next = null;
@@ -43,13 +40,12 @@ const findPrevNext = (currentPath, sidebarConfig) => {
 
   const pagesDir = new URL('../pages', import.meta.url).pathname;
 
-  // Flatten the sidebar items to a single array of paths and names
   const pages = sidebarConfig.order.flatMap((category) =>
     category.items
       .map((item) => {
         if (!item) return null;
         if (typeof item === 'object' && item.redirect) {
-          return null; // Skip redirects in the prev/next logic
+          return null; 
         }
 
         const path =
@@ -100,18 +96,15 @@ const findPrevNext = (currentPath, sidebarConfig) => {
   return { prev, next, prevName, nextName };
 };
 
-// Get the current page's path
 const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
 
-// Function to calculate reading time based on word count
 function calculateReadingTime(content) {
-  const wordsPerMinute = 200; // Average reading speed
+  const wordsPerMinute = 200;
   const wordCount = content.split(/\s+/).length;
   const readingTimeMinutes = Math.ceil(wordCount / wordsPerMinute);
   return readingTimeMinutes;
 }
 
-// Function to get the markdown content and calculate its reading time
 function getMarkdownContentAndReadingTime(filePath) {
   try {
     const fileContent = readFileSync(filePath, 'utf8');
@@ -123,7 +116,6 @@ function getMarkdownContentAndReadingTime(filePath) {
   }
 }
 
-// Get the current page's markdown file path and calculate the reading time
 const filePath = join(new URL('../pages', import.meta.url).pathname, `${currentPath}.mdx`);
 const readingTime = getMarkdownContentAndReadingTime(filePath);
 
