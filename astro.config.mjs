@@ -6,8 +6,7 @@ import netlify from "@astrojs/netlify";
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind(), mdx()],
-  adapter: netlify(),
-  output: 'server',
+  site: 'https://docs.naai.nz',
   vite: {
     resolve: {
       alias: {
