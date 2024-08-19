@@ -22,10 +22,6 @@
         "creating.astro.mjs",
         "info.astro.mjs"
       ]
-    },
-    {
-      "category": "Directories",
-      "items": ["more"]
     }
   ]
 }
