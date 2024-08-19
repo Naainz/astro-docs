@@ -1,7 +1,7 @@
 {
   "order": [
     {
-      "items": ["index.mdx", "started.mdx",
+      "items": ["index.astro.mjs", "started.astro.mjs",
       {
         "name": "Author",
         "redirect": "https://www.naai.nz"
@@ -10,7 +10,7 @@
     },
     {
       "category": "Customization",
-      "items": ["theme.mdx", "sidebar.mdx", "github.mdx"]
+      "items": ["theme.astro.mjs", "sidebar.astro.mjs", "github.astro.mjs"]
     },
     {
       "category": "Markdown Formatting",
@@ -19,8 +19,8 @@
           "name": "MDX Documentation",
           "redirect": "https://mdxjs.com/docs"
         },
-        "creating.mdx",
-        "info.mdx"
+        "creating.astro.mjs",
+        "info.astro.mjs"
       ]
     },
     {
