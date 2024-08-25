@@ -1,7 +1,7 @@
 {
   "order": [
     {
-      "items": ["index.astro.mjs", "started.astro.mjs",
+      "items": ["started.astro.mjs",
       {
         "name": "Author",
         "redirect": "https://www.naai.nz"
