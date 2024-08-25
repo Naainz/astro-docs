@@ -1,16 +1,38 @@
 {
   "order": [
     {
-      "items": ["started.astro.mjs",
+      "items": [
+      {
+          "name": "Introduction",
+          "redirect": "/"
+      },
+      {
+        "name": "Getting Started",
+        "redirect": "/started"
+      },
       {
         "name": "Author",
-        "redirect": "/started"
+        "redirect": "https://naai.nz"
       }
+      ]
     ]
     },
     {
       "category": "Customization",
-      "items": ["theme.astro.mjs", "sidebar.astro.mjs", "github.astro.mjs"]
+      "items": [
+        {
+          "name": "Themes",
+          "redirect": "/theme"
+        },
+        {
+          "name": "Sidebar",
+          "redirect": "/sidebar"
+        },
+        {
+          "name": "Github",
+          "redirect": "/github"
+        }
+      ]
     },
     {
       "category": "Markdown Formatting",
@@ -19,8 +41,14 @@
           "name": "MDX Documentation",
           "redirect": "https://mdxjs.com/docs"
         },
-        "creating.astro.mjs",
-        "info.astro.mjs"
+        {
+          "name": "New Page",
+          "redirect": "/creating"
+        },
+        {
+          "name": "Custom Path",
+          "redirect": "/info"
+        }
       ]
     }
   ]
