@@ -4,7 +4,7 @@
       "items": ["started.astro.mjs",
       {
         "name": "Author",
-        "redirect": "https://www.naai.nz"
+        "redirect": "/started"
       }
     ]
     },
