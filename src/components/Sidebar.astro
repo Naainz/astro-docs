@@ -14,12 +14,12 @@ function getPageData(filePath, parentDir = '') {
   if (isDirectory(filePath)) return null;
   const fileContent = readFileSync(filePath, 'utf8');
   const { data } = matter(fileContent);
-  const fileName = basename(filePath, '.mdx');
+  const fileName = basename(filePath, '.mdx').replace('.Astro.Mjs', '');
 
   const path = fileName === 'index' ? `/${parentDir}` : `/${parentDir}${fileName}`;
   const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || '' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-  return name.includes('.Astro.Mjs') ? null : { path, name, relativePath: join(parentDir, fileName + '.mdx') };
+  return { path, name, relativePath: join(parentDir, fileName + '.mdx') };
 }
 
 const currentPath = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
