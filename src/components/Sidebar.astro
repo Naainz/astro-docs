@@ -14,7 +14,7 @@ function getPageData(filePath, parentDir = '') {
   if (isDirectory(filePath)) return null;
   const fileContent = readFileSync(filePath, 'utf8');
   const { data } = matter(fileContent);
-  const fileName = basename(filePath, '.mdx').replace('.Astro.Mjs', '');
+  const fileName = basename(filePath, '.mdx');
 
   const path = fileName === 'index' ? `/${parentDir}` : `/${parentDir}${fileName}`;
   const name = data.path || (fileName === 'index' ? parentDir.slice(0, -1) || '' : fileName).replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -179,6 +179,7 @@ const categories = sidebarConfig.order.map(category => {
   window.handleFeedbackClick = function () {
     const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
     const issueUrl = `https://github.com/Naainz/astro-docs/issues/new?title=Feedback%20for%20“${encodeURIComponent(currentPath || 'Home')}”`;
+    console.log('Opening GitHub issue page:', issueUrl);
     window.open(issueUrl, '_blank');
   };
 
@@ -186,6 +187,7 @@ const categories = sidebarConfig.order.map(category => {
     const currentPath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
     const filePath = currentPath === '' ? 'index.mdx' : `${currentPath}.mdx`;
     const editUrl = `https://github.com/Naainz/astro-docs/edit/main/src/pages/${filePath}`;
+    console.log('Opening GitHub edit page:', editUrl);
     window.open(editUrl, '_blank');
   };
 </script>

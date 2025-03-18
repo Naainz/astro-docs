@@ -1,6 +1,9 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
 import "../styles/global.css";
+import H1 from '../components/H1.astro';
+import H2 from '../components/H2.astro';
+import H3 from '../components/H3.astro';
 import { readFileSync, statSync, existsSync } from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
@@ -8,6 +11,11 @@ import matter from 'gray-matter';
 const { title } = Astro.props;
 import sidebarConfig from '../config/sidebar.json';
 
+const components = {
+  h1: H1,
+  h2: H2,
+  h3: H3,
+};
 
 function getFrontmatterName(filePath) {
   try {
@@ -140,7 +148,7 @@ const breadcrumb = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title || "AstroDocs"}</title>
-    <link rel="stylesheet" href="global.css" />
+    <link rel="stylesheet" href="/src/styles/global.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
       .hamburger-icon div {

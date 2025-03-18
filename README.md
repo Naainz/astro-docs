@@ -1,5 +1,3 @@
-(wip)
-
 # Astro.js Documentation Template
 
 This is a documentation template coded using Astro.js. It is a simple and easy-to-use documentation template that can be used for any project. It is fully responsive and works on all devices.

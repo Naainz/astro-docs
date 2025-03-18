@@ -1,54 +1,27 @@
 {
   "order": [
     {
-      "items": [
-      {
-          "name": "Introduction",
-          "redirect": "/"
-      },
-      {
-        "name": "Getting Started",
-        "redirect": "/started"
-      },
+      "items": ["index.mdx", "started.mdx",
       {
         "name": "Author",
-        "redirect": "https://naai.nz"
+        "redirect": "https://www.naai.nz"
       }
     ]
     },
     {
       "category": "Customization",
-      "items": [
-        {
-          "name": "Themes",
-          "redirect": "/theme"
-        },
-        {
-          "name": "Sidebar",
-          "redirect": "/sidebar"
-        },
-        {
-          "name": "Github",
-          "redirect": "/github"
-        }
-      ]
+      "items": ["theme.mdx", "sidebar.mdx", "github.mdx"]
     },
     {
       "category": "Markdown Formatting",
       "items": [
-        {
-          "name": "MDX Documentation",
-          "redirect": "https://mdxjs.com/docs"
-        },
-        {
-          "name": "New Page",
-          "redirect": "/creating"
-        },
-        {
-          "name": "Custom Path",
-          "redirect": "/info"
-        }
+        "creating.mdx",
+        "info.mdx"
       ]
+    },
+    {
+      "category": "Directories",
+      "items": ["more"]
     }
   ]
 }
